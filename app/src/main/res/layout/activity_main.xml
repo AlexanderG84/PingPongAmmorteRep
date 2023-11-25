@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/layout_spinner"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#FF0000"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <LinearLayout
+
+
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <Spinner
+            android:id="@+id/player1_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:minHeight="50dp" />
+
+        <EditText
+            android:id="@+id/player1_score"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+            android:hint="Punteggio" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
+        <Spinner
+            android:id="@+id/player2_spinner"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="5"
+            android:minHeight="50dp" />
+
+        <EditText
+            android:id="@+id/player2_score"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:inputType="number"
+
+            android:hint="Punteggio" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        >
+
+
+
+            <GridLayout
+                android:id="@+id/sports"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:alignmentMode="alignMargins"
+                android:columnCount="2"
+            android:rowCount="2"
+            android:columnOrderPreserved="false">
+
+            <RadioButton
+                android:id="@+id/radio1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:layout_columnWeight="1"
+                android:checked="true"
+                android:text="PingPong 1v1" />
+
+            <RadioButton
+                android:id="@+id/radio2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:layout_columnWeight="1"
+                android:text="PingPong 2v2" />
+
+            <!-- Aggiungi gli altri RadioButton qui -->
+
+            <RadioButton
+                android:id="@+id/radio3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:layout_columnWeight="1"
+                android:text="Biliardino 1V1" />
+
+            <!-- ... -->
+
+                <RadioButton
+                    android:id="@+id/radio4"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="fill"
+                    android:layout_columnWeight="1"
+                    android:text="Biliardino 2V2" />
+
+
+                <RadioButton
+                android:id="@+id/radio5"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:layout_columnWeight="1"
+                android:text="Biliardo 1V1" />
+
+                <RadioButton
+                    android:id="@+id/radio6"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="fill"
+                    android:layout_columnWeight="1"
+                    android:text="Biliardo 2V2" />
+
+        </GridLayout>
+
+
+</LinearLayout>
+
+    <Button
+        android:id="@+id/button_submit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="Salva la Partita" />
+
+    <Button
+        android:id="@+id/button_view_scores"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Vedi Classifica" />
+
+    <Button
+        android:id="@+id/button_view_history"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Storico Sfide" />
+
+    <Button
+        android:id="@+id/clearPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:text="Salva Backup" />
+
+    <Button
+        android:id="@+id/MockPlayer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Carica Backup" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
+
+        <EditText
+            android:id="@+id/playerNameEditText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:hint="Inserisci il nome del giocatore"
+            android:inputType="textPersonName" />
+
+        <Button
+            android:id="@+id/addPlayerButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:text="+"
+            android:onClick="onAddPlayerClicked" />
+
+
+
+    </LinearLayout>
+
+
+
+</LinearLayout>

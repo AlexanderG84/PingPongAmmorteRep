@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "774074359751",
+    "firebase_url": "https://pingpongammorte2-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "pingpongammorte2",
+    "storage_bucket": "pingpongammorte2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:774074359751:android:816f4e092d8a24fa2b43e2",
+        "android_client_info": {
+          "package_name": "AuletteBlu.pingpongammorte"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCcmTT9VFggqH5tq_zJvSI5RNZ6_kn_7Ww"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
