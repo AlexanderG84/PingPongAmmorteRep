@@ -64,7 +64,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements DriveInteraction.FirebaseUpdateListener {
 
     LinearLayout layoutSpinner;
     private static final int MY_PERMISSIONS_REQUEST_STORAGE = 1;
@@ -81,6 +81,18 @@ public class MainActivity extends AppCompatActivity {
 
     public static ArrayList<Player> players; // Popolato con i dati
     private List<Player> mockPlayers; // Popolato con i dati
+
+    @Override
+    public void onFirebaseDataChanged() {
+        loadScoresFromPreferences(new LoadScoresCallback() {
+            @Override
+            public void onScoresLoaded(List<Player> players) {
+                // Logica da eseguire dopo il caricamento di 'players'
+
+                postLoadPlayers();
+            }
+        });
+    }
 
     private void checkAndRequestStoragePermission(Runnable onSuccess) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
@@ -210,7 +222,7 @@ public class MainActivity extends AppCompatActivity {
                             players = gson.fromJson(jsonFromDB, playerListType);
                             blockSaving=false;
                         } catch (JsonSyntaxException e) {
-
+                            blockSaving=true;
 
                             FileInputStream fis = null;
                             try {
@@ -1018,7 +1030,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     boolean blockSaving=true;  //se il load da db non è andato a buon fine, dati incostistenti, non permetto di salvarle
-    DriveInteraction driveInteraction = new DriveInteraction();
+  static  DriveInteraction driveInteraction = new DriveInteraction();
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -1027,6 +1041,8 @@ public class MainActivity extends AppCompatActivity {
        // FirebaseApp.initializeApp(getApplicationContext());
 
         driveInteraction.initializeFirebase();
+        driveInteraction.setUpdateListener(this);
+        driveInteraction.startListeningForUpdates();
 
         Log.d("DriveInte FirebaseInit", "Firebase inizializzato con successo");
             // Supponiamo che tu abbia una lista di giocatori predefinita
@@ -1140,6 +1156,4 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
-
-
 }

@@ -1,5 +1,6 @@
 package AuletteBlu.pingpongammorte;
 
+import static AuletteBlu.pingpongammorte.MainActivity.driveInteraction;
 import static AuletteBlu.pingpongammorte.MatchUtils.distinctMatch;
 import static AuletteBlu.pingpongammorte.MatchUtils.removeMatchesWithId;
 
@@ -48,7 +49,34 @@ public class MatchActivity extends AppCompatActivity {
     private ArrayAdapter<Match> matchAdapter;
 
 
+    private void saveScoresToPreferences() {
+        Gson gson = new Gson();
+        String playersJson = gson.toJson(players);
 
+        try {
+            //driveInteraction.readFirebaseData();
+            driveInteraction.uploadText(playersJson);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        FileOutputStream fos = null;
+        try {
+            fos = openFileOutput("players.json", MODE_PRIVATE);
+            fos.write(playersJson.getBytes());
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            if (fos != null) {
+                try {
+                    fos.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
         super.onCreateContextMenu(menu, v, menuInfo);
@@ -116,7 +144,7 @@ public class MatchActivity extends AppCompatActivity {
     }
 
 
-    private void saveScoresToPreferences() {
+    private void _saveScoresToPreferences() {
         Gson gson = new Gson();
         String playersJson = gson.toJson(players);
 

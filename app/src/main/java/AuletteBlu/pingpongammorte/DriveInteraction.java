@@ -35,6 +35,22 @@ public class DriveInteraction {
         }
     }
 
+    public void startListeningForUpdates() {
+        databaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (updateListener != null) {
+                    updateListener.onFirebaseDataChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e("Firebase", "Errore durante l'ascolto dei cambiamenti", databaseError.toException());
+            }
+        });
+    }
+
 
     public static String convertTimestampToDate(long timestamp) {
         Date date = new Date(timestamp);
@@ -150,5 +166,15 @@ public class DriveInteraction {
         return lastModifiedRef.get();
     }
 
+
+    private FirebaseUpdateListener updateListener;
+
+    public void setUpdateListener(FirebaseUpdateListener listener) {
+        this.updateListener = listener;
+    }
+
+    public interface FirebaseUpdateListener {
+        void onFirebaseDataChanged();
+    }
 
 }
