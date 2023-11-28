@@ -659,69 +659,9 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
  }
     public void runPostLoadPlayers(){
 
-        for (Player player : players) {
-            String currentName = player.getName();
-
-            if (currentName.equals("Pomalex")) {
-                String newName = "Pompolus - Talex";
-                updatePlayerAndMatches(player, newName);
-            } else if (currentName.equals("Strinele")) {
-                String newName = "Strino - Daniele";
-                updatePlayerAndMatches(player, newName);
-            } else if (currentName.equals("Taniele")) {
-                String newName = "Talex - Daniele";
-                updatePlayerAndMatches(player, newName);
-            } else if (currentName.equals("Strinolus")) {
-                String newName = "Strino - Pompolus";
-                updatePlayerAndMatches(player, newName);
-            } else if (currentName.equals("Danpolus")) {
-                String newName = "Daniele - Pompolus";
-                updatePlayerAndMatches(player, newName);
-            } else if (currentName.equals("Stralex")) {
-                String newName = "Strino - Talex";
-                updatePlayerAndMatches(player, newName);
-            }
 
 
-        }
 
-
-        for (Player currentPlayer : players) {
-            for (Match match : currentPlayer.getMatches()) {
-                String winner = match.getWinner();
-                String loser = match.getLoser();
-
-                // Aggiorna il nome del vincitore se è uno dei vecchi nomi
-                if (winner.equals("Pomalex")) {
-                    match.setWinner("Pompolus - Talex");
-                } else if (winner.equals("Strinele")) {
-                    match.setWinner("Strino - Daniele");
-                } else if (winner.equals("Taniele")) {
-                    match.setWinner("Talex - Daniele");
-                } else if (winner.equals("Strinolus")) {
-                    match.setWinner("Strino - Pompolus");
-                } else if (winner.equals("Danpolus")) {
-                    match.setWinner("Daniele - Pompolus");
-                } else if (winner.equals("Stralex")) {
-                    match.setWinner("Strino - Talex");
-                }
-
-                // Aggiorna il nome del perdente se è uno dei vecchi nomi
-                if (loser.equals("Pomalex")) {
-                    match.setLoser("Pompolus - Talex");
-                } else if (loser.equals("Strinele")) {
-                    match.setLoser("Strino - Daniele");
-                } else if (loser.equals("Taniele")) {
-                    match.setLoser("Talex - Daniele");
-                } else if (loser.equals("Strinolus")) {
-                    match.setLoser("Strino - Pompolus");
-                } else if (loser.equals("Danpolus")) {
-                    match.setLoser("Daniele - Pompolus");
-                } else if (loser.equals("Stralex")) {
-                    match.setLoser("Strino - Talex");
-                }
-            }
-        }
 
         LocalDate specificDate = null;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -1106,9 +1046,72 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         }
     }
 
-    public void refreshSpinner(){
+
+    private void setupPlayerSpinners() {
+        player1Spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                refreshPlayer2Spinner();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Gestisci il caso in cui non viene selezionato nessun elemento
+            }
+        });
+        refreshPlayer2Spinner();
+    }
+
+    private void refreshPlayer2Spinner() {
+        Player selectedPlayer1 = (Player) player1Spinner.getSelectedItem();
 
         List<Player> filteredPlayers = new ArrayList<>();
+
+        // Filtra i giocatori in base al tipo di partita
+        for (Player player : players) {
+            if (matchType.toLowerCase().contains("2v2") && player.getName().contains("-")) {
+                filteredPlayers.add(player);
+            } else if (matchType.toLowerCase().contains("1v1")&& !player.getName().contains("-")) {
+                // Se il tipo di partita non è "2v2", aggiungi tutti i giocatori
+                filteredPlayers.add(player);
+            }
+        }
+
+
+        List<Player> filteredPlayersForPlayer2 = new ArrayList<>();
+
+        for (Player player : filteredPlayers) {
+            if (isDifferentPlayer(selectedPlayer1, player)) {
+                filteredPlayersForPlayer2.add(player);
+            }
+        }
+
+        ArrayAdapter<Player> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, filteredPlayersForPlayer2);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        player2Spinner.setAdapter(adapter);
+    }
+
+    private boolean isDifferentPlayer(Player selectedPlayer1, Player player2) {
+        if (selectedPlayer1 == null || player2 == null) {
+            return true;
+        }
+
+        String selectedPlayer1Name = selectedPlayer1.getName();
+        String player2Name = player2.getName();
+
+        if (selectedPlayer1Name.contains("-")) {
+            String[] parts = selectedPlayer1Name.split(" - ");
+            return !player2Name.contains(parts[0].trim()) && !player2Name.contains(parts[1].trim());
+        } else {
+            return !selectedPlayer1Name.equals(player2Name);
+        }
+    }
+
+
+
+    public void refreshSpinner(){
+
+      /*  List<Player> filteredPlayers = new ArrayList<>();
 
         // Filtra i giocatori in base al tipo di partita
         for (Player player : players) {
@@ -1125,6 +1128,26 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
         player1Spinner.setAdapter(adapter);
         player2Spinner.setAdapter(adapter);
+*/
+
+        List<Player> filteredPlayers = new ArrayList<>();
+
+        // Filtra i giocatori in base al tipo di partita
+        for (Player player : players) {
+            if (matchType.toLowerCase().contains("2v2") && player.getName().contains("-")) {
+                filteredPlayers.add(player);
+            } else if (matchType.toLowerCase().contains("1v1")&& !player.getName().contains("-")) {
+                // Se il tipo di partita non è "2v2", aggiungi tutti i giocatori
+                filteredPlayers.add(player);
+            }
+        }
+
+        ArrayAdapter<Player> adapter = new ArrayAdapter<>(this, R.layout.spinner_item, filteredPlayers);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
+        player1Spinner.setAdapter(adapter);
+
+        // Inizializza i listener e l'adapter per player2Spinner
+        setupPlayerSpinners();
 
     }
     public void onAddPlayerClicked() {
