@@ -1,0 +1,52 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+
+
+    <!-- Layout per i vincitori -->
+    <LinearLayout
+        android:id="@+id/linearLayoutWinners"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- ImageView superiore sinistra (vincitore 1) -->
+        <ImageView
+            android:id="@+id/imageViewWinnerTop"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- ImageView inferiore sinistra (vincitore 2) -->
+        <ImageView
+            android:id="@+id/imageViewWinnerBottom"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+
+    <!-- Layout per i perdenti a destra -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <!-- ImageView superiore destra (perdente 1) -->
+        <ImageView
+            android:id="@+id/imageViewLoserTop"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- ImageView inferiore destra (perdente 2) -->
+        <ImageView
+            android:id="@+id/imageViewLoserBottom"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+    </LinearLayout>
+</LinearLayout>

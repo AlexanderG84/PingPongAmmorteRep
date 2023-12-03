@@ -1,7 +1,11 @@
 package AuletteBlu.pingpongammorte;
 
 import android.Manifest;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.pm.PackageManager;
@@ -21,17 +25,18 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
+import android.view.animation.BounceInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -40,7 +45,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
-import com.google.firebase.FirebaseApp;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -63,7 +67,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+
 public class MainActivity extends AppCompatActivity implements DriveInteraction.FirebaseUpdateListener {
 
     LinearLayout layoutSpinner;
@@ -845,7 +849,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 if (winner.equals(loser)) {
                     //saveScoresToPreferences();
                     Toast.makeText(MainActivity.this, "I giocatori selezionati devono essere diversi!", Toast.LENGTH_SHORT).show();
-                    coloraSfondo(false);
+                    coloraSfondo(false,"","");
                     return;
                 }
 
@@ -856,7 +860,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 // Verifica che non ci siano duplicati
                 if (containsDuplicate(winnerNames, loserNames)) {
                     Toast.makeText(MainActivity.this, "FAGGIANO! Un giocatore non può stare in entrambe le squadre.", Toast.LENGTH_SHORT).show();
-                    coloraSfondo(false);
+                    coloraSfondo(false,"","");;
                     return;
 
                 }
@@ -905,7 +909,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
                 else
                     Toast.makeText(MainActivity.this, winner.getName() + " VINCE  contro quella pippa di "+loser.getName(), Toast.LENGTH_SHORT).show();
-                coloraSfondo(true);
+                coloraSfondo(true, winner.getName(), loser.getName());
 // Reset dei campi del punteggio
                 player1ScoreEditText.setText("-1");
                 player2ScoreEditText.setText("-1");
@@ -1015,20 +1019,71 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
     }
 
-    public void coloraSfondo(boolean res){
+   /* public void _coloraSfondo(boolean res, String winnerName, String loserName){
 
         if(res){
-// Imposta il colore di sfondo rosso
+            // Imposta il colore di sfondo verde
             layoutSpinner.setBackgroundColor(Color.GREEN);
 
-// Utilizza un Handler per ritardare il ripristino del colore di sfondo
+            // Crea e mostra la Dialog
+            final Dialog dialog = new Dialog(this); // Assicurati che 'this' sia un Context valido
+            dialog.setContentView(R.layout.dialog_layout);
+
+            // Imposta le immagini nel dialog
+            ImageView imageView1 = dialog.findViewById(R.id.imageView1);
+            ImageView imageView2 = dialog.findViewById(R.id.imageView2);
+
+
+            int resIdFirst = getApplication().getResources().getIdentifier(winnerName.toLowerCase(), "drawable", getApplication().getPackageName());
+
+            if (resIdFirst != 0) {
+                imageView1.setImageResource(resIdFirst);
+            } else {
+                imageView1.setImageResource(R.drawable.default_player_image); // Immagine di default se non trovata
+            }
+
+            int resIdFirst2 = getApplication().getResources().getIdentifier(loserName.toLowerCase(), "drawable", getApplication().getPackageName());
+
+            if (resIdFirst2 != 0) {
+                imageView2.setImageResource(resIdFirst2);
+            } else {
+                imageView2.setImageResource(R.drawable.default_player_image); // Immagine di default se non trovata
+            }
+
+
+
+
+
+            dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
+            dialog.show();
+
+
+            // Avvia l'animazione di ingrandimento per l'immagine di sinistra
+            ObjectAnimator scaleXAnimatorLeft = ObjectAnimator.ofFloat(imageView1, "scaleX", 1f, 2f);
+            ObjectAnimator scaleYAnimatorLeft = ObjectAnimator.ofFloat(imageView1, "scaleY", 1f, 2f);
+            scaleXAnimatorLeft.setDuration(1500);
+            scaleYAnimatorLeft.setDuration(1500);
+            scaleXAnimatorLeft.start();
+            scaleYAnimatorLeft.start();
+
+            // Avvia le animazioni di ridimensionamento e rotazione per l'immagine di destra
+            ObjectAnimator scaleXAnimatorRight = ObjectAnimator.ofFloat(imageView2, "scaleX", 1f, 0.5f);
+            ObjectAnimator scaleYAnimatorRight = ObjectAnimator.ofFloat(imageView2, "scaleY", 1f, 0.5f);
+            ObjectAnimator rotationAnimatorRight = ObjectAnimator.ofFloat(imageView2, "rotation", 0f, 180f);
+
+            AnimatorSet animatorSetRight = new AnimatorSet();
+            animatorSetRight.playTogether(scaleXAnimatorRight, scaleYAnimatorRight, rotationAnimatorRight);
+            animatorSetRight.setDuration(1500); // Durata dell'animazione
+            animatorSetRight.start();
+
+            // Handler per chiudere la dialog dopo un ritardo
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    // Ripristina il colore di sfondo originale (o imposta un altro colore desiderato)
-                    layoutSpinner.setBackgroundColor(Color.TRANSPARENT); // Usato qui come esempio, puoi impostare il colore originale o un altro colore
+                    dialog.dismiss();
+                    layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
                 }
-            }, 500); // 2000 millisecondi (2 secondi)
+            }, 1500); // Ritardo in millisecondi
 
         }else {
 
@@ -1045,6 +1100,115 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             }, 500); // 2000 millisecondi (2 secondi)
         }
     }
+*/
+   public void coloraSfondo(boolean res, String winnerName, String loserName){
+       if(res){
+           // Imposta il colore di sfondo verde
+           layoutSpinner.setBackgroundColor(Color.GREEN);
+
+           // Crea e mostra la Dialog
+           final Dialog dialog = new Dialog(this); // Assicurati che 'this' sia un Context valido
+           dialog.setContentView(R.layout.dialog_layout);
+
+           // Ottieni le ImageView dal layout
+           ImageView imageViewWinnerTop = dialog.findViewById(R.id.imageViewWinnerTop);
+           ImageView imageViewWinnerBottom = dialog.findViewById(R.id.imageViewWinnerBottom);
+           ImageView imageViewLoserTop = dialog.findViewById(R.id.imageViewLoserTop);
+           ImageView imageViewLoserBottom = dialog.findViewById(R.id.imageViewLoserBottom);
+
+           // Gestisci la visibilità e imposta le immagini per vincitori e perdenti
+           handlePlayerImageViews(new ImageView[]{imageViewWinnerTop, imageViewWinnerBottom}, winnerName, true);
+           handlePlayerImageViews(new ImageView[]{imageViewLoserTop, imageViewLoserBottom}, loserName, false);
+
+           dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
+           dialog.show();
+
+           // Applica le animazioni
+           applyAnimation(new ImageView[]{imageViewWinnerTop, imageViewWinnerBottom}, true);
+           applyAnimation(new ImageView[]{imageViewLoserTop, imageViewLoserBottom}, false);
+
+           // Handler per chiudere la dialog dopo un ritardo
+           new Handler().postDelayed(new Runnable() {
+               @Override
+               public void run() {
+                   dialog.dismiss();
+                   layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
+               }
+           }, 1500); // Ritardo in millisecondi
+       } else {
+           // Imposta il colore di sfondo rosso e ritarda il ripristino del colore
+           layoutSpinner.setBackgroundColor(Color.RED);
+           new Handler().postDelayed(new Runnable() {
+               @Override
+               public void run() {
+                   layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
+               }
+           }, 500);
+       }
+   }
+
+    // Metodo per gestire la visibilità e impostare le immagini dei giocatori
+    private void handlePlayerImageViews(ImageView[] imageViews, String playerName, boolean isWinner) {
+        String[] players = playerName.split("-");
+        for (int i = 0; i < imageViews.length; i++) {
+            if (i < players.length) {
+                setPlayerImage(imageViews[i], players[i],isWinner);
+                imageViews[i].setVisibility(View.VISIBLE);
+            } else {
+                imageViews[i].setVisibility(View.GONE);
+            }
+        }
+    }
+
+    // Metodo per impostare l'immagine di un singolo giocatore
+    private void setPlayerImage(ImageView imageView, String playerName, boolean isWinner) {
+        String playerImageName = playerName.toLowerCase().trim();
+        String suffix = isWinner ? "win" : "lose";
+        int resId = getApplication().getResources().getIdentifier(playerImageName + suffix, "drawable", getApplication().getPackageName());
+
+        if (resId == 0) {
+            // Se non trova l'immagine con il suffisso, cerca senza il suffisso
+            resId = getApplication().getResources().getIdentifier(playerImageName, "drawable", getApplication().getPackageName());
+        }
+
+        imageView.setImageResource(resId != 0 ? resId : R.drawable.default_player_image);
+    }
+
+    // Metodo per applicare le animazioni
+    private void applyAnimation(ImageView[] imageViews, boolean isWinner) {
+        for (ImageView imageView : imageViews) {
+            if (imageView.getVisibility() == View.VISIBLE) {
+                animatePlayer(imageView, isWinner);
+            }
+        }
+    }
+
+    // Metodo per animare un singolo giocatore
+
+    private void animatePlayer(ImageView imageView, boolean isWinner) {
+        if (isWinner) {
+            // Ingrandimento semplice
+            ObjectAnimator scaleX = ObjectAnimator.ofFloat(imageView, "scaleX", 1f, 2f);
+            ObjectAnimator scaleY = ObjectAnimator.ofFloat(imageView, "scaleY", 1f, 2f);
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(scaleX, scaleY);
+            set.setDuration(2000);
+            set.start();
+        } else {
+            // Rimpicciolimento con rotazione e dissolvenza
+            ObjectAnimator scaleX = ObjectAnimator.ofFloat(imageView, "scaleX", 1f, 0f);
+            ObjectAnimator scaleY = ObjectAnimator.ofFloat(imageView, "scaleY", 1f, 0f);
+            ObjectAnimator rotate = ObjectAnimator.ofFloat(imageView, "rotation", 0f, 180f);
+            ObjectAnimator fadeOut = ObjectAnimator.ofFloat(imageView, "alpha", 1f, 0f);
+            AnimatorSet set = new AnimatorSet();
+            set.playTogether(scaleX, scaleY, rotate, fadeOut);
+            set.setDuration(2000);
+            set.start();
+        }
+    }
+
+
+
 
 
     private void setupPlayerSpinners() {
@@ -1158,13 +1322,13 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             players.add(new Player(newPlayerName,0));
             playerNameEditText.setText("");  // Pulisci l'EditText
             Toast.makeText(this, "Giocatore aggiunto!", Toast.LENGTH_SHORT).show();
-            coloraSfondo(true);
+            coloraSfondo(true, "","");
         } else if (playerNameExists(newPlayerName)) {
             Toast.makeText(this, "Il nome del giocatore esiste già!", Toast.LENGTH_SHORT).show();
-            coloraSfondo(false);
+            coloraSfondo(false,"","");
         } else {
             Toast.makeText(this, "Inserisci un nome valido!", Toast.LENGTH_SHORT).show();
-            coloraSfondo(false);
+            coloraSfondo(false, "","");
         }
 
 
