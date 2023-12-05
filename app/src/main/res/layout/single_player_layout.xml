@@ -1,0 +1,41 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_weight="1"
+    android:orientation="vertical"
+    android:paddingLeft="10dp">
+
+    <!-- ImageView per un singolo giocatore -->
+    <ImageView
+        android:id="@+id/playerImage"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:src="@drawable/ic_launcher_background"
+        android:scaleType="fitCenter" />
+
+    <!-- TextViews per un singolo giocatore -->
+    <TextView
+        android:id="@+id/playerDate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Data"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:padding="8dp"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/playerName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nome Giocatore"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/playerDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Dettagli Giocatore"
+        android:textSize="14sp" />
+</LinearLayout>

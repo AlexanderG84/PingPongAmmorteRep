@@ -44,7 +44,7 @@ public class AlboDOroActivity extends AppCompatActivity {
 
                 String date = match.getDate();
                 Player currentBest = bestPlayersPerDay.get(date);
-                if (currentBest == null || player.getVictoriesOnDate(players,date,orderByVict) > currentBest.getVictoriesOnDate(players,date,orderByVict)) {
+                if (currentBest == null || player.getVictoriesOnDate(players,date,orderByVict) >= currentBest.getVictoriesOnDate(players,date,orderByVict)) {
                     bestPlayersPerDay.put(date,deepClonePlayer (player));
                 }
             }
