@@ -423,6 +423,13 @@ public class LeaderboardActivity extends AppCompatActivity {
         return gson.fromJson(jsonString, playerListType);
     }
 
+    static public Player deepClonePlayer(Player original) {
+        Gson gson = new Gson();
+        String jsonString = gson.toJson(original);
+        Type playerListType = new TypeToken<Player>() {}.getType();
+        return gson.fromJson(jsonString, playerListType);
+    }
+
     // E che tu abbia una funzione per cercare un giocatore basato sul nome:
     private Player findPlayerByName(List<Player> players, String name) {
         for (Player player : players) {

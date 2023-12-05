@@ -5,6 +5,7 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <!-- Primo RadioGroup con orientamento orizzontale -->
     <RadioGroup
         android:id="@+id/radioGroupSelection"
         android:layout_width="match_parent"
@@ -25,6 +26,7 @@
             android:text="Classifica"/>
     </RadioGroup>
 
+    <!-- Secondo RadioGroup con orientamento orizzontale -->
     <RadioGroup
         android:id="@+id/radioGroupMetric"
         android:layout_width="match_parent"
@@ -45,6 +47,7 @@
             android:text="% Vittorie"/>
     </RadioGroup>
 
+    <!-- ListView rimane invariato -->
     <ListView
         android:id="@+id/listViewAlboDOro"
         android:layout_width="match_parent"

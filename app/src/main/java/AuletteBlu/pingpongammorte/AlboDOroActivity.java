@@ -1,5 +1,8 @@
 package AuletteBlu.pingpongammorte;
 
+import static AuletteBlu.pingpongammorte.LeaderboardActivity.deepClonePlayer;
+
+import android.os.Build;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -7,6 +10,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -41,10 +45,15 @@ public class AlboDOroActivity extends AppCompatActivity {
                 String date = match.getDate();
                 Player currentBest = bestPlayersPerDay.get(date);
                 if (currentBest == null || player.getVictoriesOnDate(players,date,orderByVict) > currentBest.getVictoriesOnDate(players,date,orderByVict)) {
-                    bestPlayersPerDay.put(date, player);
+                    bestPlayersPerDay.put(date,deepClonePlayer (player));
                 }
             }
         }
+
+        for (Player player : players) {
+
+        }
+
 
         List<PlayerWithDate> alboDoro = new ArrayList<>();
         for (Map.Entry<String, Player> entry : bestPlayersPerDay.entrySet()) {
@@ -52,6 +61,27 @@ public class AlboDOroActivity extends AppCompatActivity {
             Player player = entry.getValue();
             alboDoro.add(new PlayerWithDate(player, date,0));
         }
+
+
+        // Ordina la lista in base alla data in ordine decrescente (dal più recente al più vecchio)
+        Collections.sort(alboDoro, new Comparator<PlayerWithDate>() {
+            @Override
+            public int compare(PlayerWithDate p1, PlayerWithDate p2) {
+                // Converte le stringhe delle date in LocalDate per il confronto
+                LocalDate date1 = null;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    date1 = LocalDate.parse(p1.getDate());
+                }
+                LocalDate date2 = null;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    date2 = LocalDate.parse(p2.getDate());
+                }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    return date2.compareTo(date1); // Ordine decrescente
+                }
+                return 0;
+            }
+        });
 
         return alboDoro;
 
@@ -80,7 +110,7 @@ public class AlboDOroActivity extends AppCompatActivity {
                         (player.getVictoriesOnDate(players,date,orderByVict) > currentBest.getVictoriesOnDate(players,date,orderByVict)); // Confronta in base al numero di vittorie
 
                 if (isCurrentBest) {
-                    bestPlayerPerDay.put(date, player);
+                    bestPlayerPerDay.put(date, deepClonePlayer (player));
                 }
 
             }
