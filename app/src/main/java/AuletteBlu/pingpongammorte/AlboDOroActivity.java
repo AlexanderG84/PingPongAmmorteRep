@@ -169,6 +169,8 @@ public class AlboDOroActivity extends AppCompatActivity {
         listView.setAdapter(adapter);
 
         setupRadioGroupListeners();
+
+        updateListViewData();
     }
 
     private void setupRadioGroupListeners() {
