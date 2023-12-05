@@ -76,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
     private Button submitButton;
     private Button viewScoresButton;
     private Button viewHistoryButton;
+    private Button viewHistoryAlbo;
     Button btnClearPlayers;
     Button btnMockPlayer;
 
@@ -673,7 +674,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         submitButton = findViewById(R.id.button_submit);
         viewScoresButton = findViewById(R.id.button_view_scores);
         viewHistoryButton = findViewById(R.id.button_view_history);
-
+        viewHistoryAlbo =  findViewById(R.id.button_view_albo);
         btnClearPlayers = findViewById(R.id.clearPlayer);
         btnMockPlayer = findViewById(R.id.MockPlayer);
 
@@ -921,6 +922,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this, LeaderboardActivity.class);
                 intent.putExtra("players", players);
+
                 startActivity(intent);
             }
         });
@@ -930,6 +932,17 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             public void onClick(View v) {
 
                 Intent intent = new Intent(MainActivity.this, MatchActivity.class);
+                intent.putExtra("players", players);
+                startActivity(intent);
+
+            }
+        });
+
+        viewHistoryAlbo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                Intent intent = new Intent(MainActivity.this, AlboDOroActivity.class);
                 intent.putExtra("players", players);
                 startActivity(intent);
 

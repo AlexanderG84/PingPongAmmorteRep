@@ -154,6 +154,12 @@
         android:text="Storico Sfide" />
 
     <Button
+        android:id="@+id/button_view_albo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ALBO D'ORO" />
+
+    <Button
         android:id="@+id/clearPlayer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

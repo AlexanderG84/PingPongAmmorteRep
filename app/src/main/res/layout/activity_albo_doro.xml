@@ -1,0 +1,53 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <RadioGroup
+        android:id="@+id/radioGroupSelection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/radioAlboDOro"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Albo d'Oro"
+            android:checked="true"/>
+        <RadioButton
+            android:id="@+id/radioClassifica"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Classifica"/>
+    </RadioGroup>
+
+    <RadioGroup
+        android:id="@+id/radioGroupMetric"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <RadioButton
+            android:id="@+id/radioNumVittorie"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Numero Vittorie"
+            android:checked="true"/>
+        <RadioButton
+            android:id="@+id/radioPercentVittorie"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="% Vittorie"/>
+    </RadioGroup>
+
+    <ListView
+        android:id="@+id/listViewAlboDOro"
+        android:layout_width="match_parent"
+        android:layout_height="100px"
+        android:layout_weight="1"/>
+</LinearLayout>

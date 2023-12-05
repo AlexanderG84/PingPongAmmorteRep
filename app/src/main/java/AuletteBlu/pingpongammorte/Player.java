@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Player implements Serializable {
     private String name;
@@ -18,6 +19,38 @@ public class Player implements Serializable {
 
     private List<String> victoriesAgainst;
     public int score;
+
+    public int getVictoriesOnDate(List<Player> players,String date, boolean returnType) {
+
+        getMatchesOnDateWithOpponents(players.stream().map(Player::getName).collect(Collectors.toList()) , date, MainActivity.matchType);
+        int intValue = (int) victoryPercentage;
+        if(!returnType)
+            return score;
+        else return intValue;
+
+
+//        int victories = 0;
+//        for (Match match : matches) {
+//            if (match.getDate().equals(date) && match.getWinner().equals(this.name) && match.type.equals(MainActivity.matchType)) {
+//                victories++;
+//            }
+//        }
+//        return victories;
+    }
+
+
+    public List<String> getAllVictoryDates() {
+        List<String> dates = new ArrayList<>();
+        for (Match match : matches) {
+            if (match.getWinner().equals(this.name) && match.type.equals(MainActivity.matchType)) {
+                if (!dates.contains(match.getDate())) {
+                    dates.add(match.getDate());
+                }
+            }
+        }
+        return dates;
+    }
+
 
     public List<Match> getMatches() {
         return matches;
