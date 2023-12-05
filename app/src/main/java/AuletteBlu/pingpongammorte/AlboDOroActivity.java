@@ -24,7 +24,7 @@ public class AlboDOroActivity extends AppCompatActivity {
     private PlayerAdapterAlbo adapter;
 
 
-    private List<Player> calculateAlboDOro() {
+    private List<PlayerWithDate> calculateAlboDOro() {
         // Mappa per tenere traccia dei giocatori e delle loro vittorie per ogni giorno
         Map<String, Player> bestPlayersPerDay = new HashMap<>();
 
@@ -46,11 +46,20 @@ public class AlboDOroActivity extends AppCompatActivity {
             }
         }
 
-        return new ArrayList<>(bestPlayersPerDay.values());
+        List<PlayerWithDate> alboDoro = new ArrayList<>();
+        for (Map.Entry<String, Player> entry : bestPlayersPerDay.entrySet()) {
+            String date = entry.getKey();
+            Player player = entry.getValue();
+            alboDoro.add(new PlayerWithDate(player, date,0));
+        }
+
+        return alboDoro;
+
+        //return new ArrayList<>(bestPlayersPerDay.values());
     }
 
 
-    private List<Player> calculateClassifica() {
+    private List<PlayerWithDate> calculateClassifica() {
         Map<String, Integer> bestPlayerDaysCount = new HashMap<>(); // Mappa per tenere traccia delle volte in cui ogni giocatore è stato il migliore
         RadioButton selectedMetric = findViewById(radioGroupMetric.getCheckedRadioButtonId());
         boolean orderByVict = selectedMetric.getId() == R.id.radioPercentVittorie;
@@ -73,6 +82,7 @@ public class AlboDOroActivity extends AppCompatActivity {
                 if (isCurrentBest) {
                     bestPlayerPerDay.put(date, player);
                 }
+
             }
         }
 
@@ -82,11 +92,28 @@ public class AlboDOroActivity extends AppCompatActivity {
             bestPlayerDaysCount.put(playerName, bestPlayerDaysCount.getOrDefault(playerName, 0) + 1);
         }
 
+        // Converti la mappa in una lista di PlayerWithDate
+        List<PlayerWithDate> classifica = bestPlayerDaysCount.entrySet().stream()
+                .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue())) // Ordina in base al conteggio
+                .map(e -> new PlayerWithDate(findPlayerByName(e.getKey()), String.valueOf(e.getValue()), e.getValue()))
+                .collect(Collectors.toList());
+
+        return classifica;
+       /*
+        // Calcola quante volte ciascun giocatore è stato il migliore
+        for (Player bestPlayer : bestPlayerPerDay.values()) {
+            String playerName = bestPlayer.getName();
+            bestPlayerDaysCount.put(playerName, bestPlayerDaysCount.getOrDefault(playerName, 0) + 1);
+        }
+
+
+
+
         // Converti la mappa in una lista ordinata di giocatori
         return bestPlayerDaysCount.entrySet().stream()
                 .sorted((e1, e2) -> e2.getValue().compareTo(e1.getValue())) // Ordina in base al numero di volte migliore
                 .map(e -> findPlayerByName(e.getKey()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
     }
 
 
@@ -164,18 +191,32 @@ public class AlboDOroActivity extends AppCompatActivity {
         RadioButton selectedView = findViewById(radioGroupSelection.getCheckedRadioButtonId());
         RadioButton selectedMetric = findViewById(radioGroupMetric.getCheckedRadioButtonId());
 
-        List<Player> displayList = new ArrayList<>();
+/*
+        List<PlayerWithDate> displayList = new ArrayList<>();
 
         if (selectedView.getId() == R.id.radioAlboDOro) {
             displayList = calculateAlboDOro();
         } else if (selectedView.getId() == R.id.radioClassifica) {
-            displayList = calculateClassifica();
+            //displayList = calculateClassifica();
         }
+*/
+
+
+        if (selectedView.getId() == R.id.radioAlboDOro) {
+            adapter.setIsAlboDoroView(true);
+            List<PlayerWithDate> displayList = calculateAlboDOro();
+            adapter.setPlayersWithDate(displayList);
+        } else if (selectedView.getId() == R.id.radioClassifica) {
+            adapter.setIsAlboDoroView(false);
+            List<PlayerWithDate> displayList = calculateClassifica();
+            adapter.setPlayersWithDate(displayList);
+        }
+
 
         //adapter = new PlayerAdapterAlbo(this, displayList); // Inizialmente vuoto
         //listView.setAdapter(adapter);
         //listView.setAdapter(adapter);
-        adapter.setPlayers(displayList);
+       // adapter.setPlayers(displayList);
         adapter.notifyDataSetChanged();
     }
 

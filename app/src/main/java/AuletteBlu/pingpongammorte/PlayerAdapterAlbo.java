@@ -11,41 +11,31 @@ import java.util.List;
 
 public class PlayerAdapterAlbo extends BaseAdapter {
 
-    public class PlayerWithDate {
-        private Player player;
-        private String date;
 
-        public PlayerWithDate(Player player, String date) {
-            this.player = player;
-            this.date = date;
-        }
-
-        public Player getPlayer() {
-            return player;
-        }
-
-        public String getDate() {
-            return date;
-        }
-    }
-
+    private boolean isAlboDoroView; // True per Albo d'Oro, false per Classifica
 
     private Context context;
-    private List<Player> players;
+    private List<PlayerWithDate> players;
 
-    public void setPlayers(List<Player> newPlayers) {
+    public void setPlayersWithDate(List<PlayerWithDate> newPlayersWithDate) {
+        this.players = newPlayersWithDate;
+    }
+
+    public void setIsAlboDoroView(boolean isAlboDoroView) {
+        this.isAlboDoroView = isAlboDoroView;
+    }
+
+    public void setPlayers(List<PlayerWithDate> newPlayers) {
         this.players = newPlayers;
     }
 
-    public PlayerAdapterAlbo(Context context, List<Player> players) {
+    public PlayerAdapterAlbo(Context context, List<PlayerWithDate> players) {
         this.context = context;
         this.players = players;
     }
 
     @Override
     public int getCount() {
-        if(players.size()==0)
-            Log.i("pingpong NOOOOO", "NOOOO");
         return players.size();
     }
 
@@ -58,7 +48,6 @@ public class PlayerAdapterAlbo extends BaseAdapter {
     public long getItemId(int position) {
         return position;
     }
-
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
@@ -71,18 +60,28 @@ public class PlayerAdapterAlbo extends BaseAdapter {
         ImageView playerImage = convertView.findViewById(R.id.playerImage);
         TextView playerName = convertView.findViewById(R.id.playerName);
         TextView playerDetails = convertView.findViewById(R.id.playerDetails);
+        TextView playerDate = convertView.findViewById(R.id.playerDate); // Aggiungi un TextView per la data nel tuo layout XML
 
-        Player player = players.get(position);
+        Player player = players.get(position).getPlayer();
 
         // Setta l'immagine del giocatore (esempio: R.drawable.alex)
         int imageId = context.getResources().getIdentifier(player.getName().toLowerCase(), "drawable", context.getPackageName());
         playerImage.setImageResource(imageId);
+        String date = players.get(position).getDate();
 
         playerName.setText(player.getName());
         // Calcola i dettagli del giocatore come numero di vittorie o percentuale
         String details = "Vittorie: " + player.score+ " - Percentuale: " + player.victoryPercentage + "%";
         playerDetails.setText(details);
+        if (isAlboDoroView) {
+            // Visualizza la data
+            date = players.get(position).getDate();
+        } else {
+            // Visualizza il conteggio
+            date =Integer.toString(players.get(position).getCount());
+        }
 
+        playerDate.setText(date);
         return convertView;
     }
 }
