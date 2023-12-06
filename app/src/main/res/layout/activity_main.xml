@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/background_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
 <LinearLayout
     android:id="@+id/layout_spinner"
     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -139,24 +150,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
+        android:textColor="#008000"
+        android:textStyle="bold"
         android:text="Salva la Partita" />
+
+    <!-- Linea di separazione -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#BDBDBD"
+        android:layout_marginTop="40dp"
+        android:layout_marginBottom="0dp"/>
 
     <Button
         android:id="@+id/button_view_scores"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:textColor="#FF0000"
+        android:textStyle="bold"
         android:text="Vedi Classifica" />
 
     <Button
         android:id="@+id/button_view_history"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="#FF0000"
+        android:textStyle="bold"
+        android:layout_marginTop="5dp"
         android:text="Storico Sfide" />
 
     <Button
         android:id="@+id/button_view_albo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="#FFD700"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp"
         android:text="ALBO D'ORO" />
 
     <Button
@@ -164,12 +194,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
+        android:textStyle="bold"
         android:text="Salva Backup" />
 
     <Button
         android:id="@+id/MockPlayer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textStyle="bold"
         android:text="Carica Backup" />
 
     <LinearLayout
@@ -201,3 +233,4 @@
 
 
 </LinearLayout>
+</FrameLayout>

@@ -227,25 +227,33 @@ public class PlayerAdapterAlbo extends BaseAdapter {
         String secondName = playerNames.length > 1 ? playerNames[1].trim() : ""; // Nome del secondo giocatore, se presente
 
         if (secondName.equals("")) {
-            int resIdFirst = context.getResources().getIdentifier(firstName.toLowerCase(), "drawable", context.getPackageName());
+            int resIdFirst = context.getResources().getIdentifier(firstName.toLowerCase()+"win", "drawable", context.getPackageName());
 
             if (resIdFirst != 0) {
                 playerImageView.setImageResource(resIdFirst);
             } else {
+                resIdFirst = context.getResources().getIdentifier(firstName.toLowerCase(), "drawable", context.getPackageName());
+                if (resIdFirst != 0) {
+                    playerImageView.setImageResource(resIdFirst);
+                } else
                 playerImageView.setImageResource(R.drawable.default_player_image); // Immagine di default se non trovata
             }
             return convertView;
         }
 
 // Caricamento delle immagini
-        int resIdFirst = context.getResources().getIdentifier(firstName.toLowerCase(), "drawable", context.getPackageName());
-        int resIdSecond = context.getResources().getIdentifier(secondName.toLowerCase(), "drawable", context.getPackageName());
+        int resIdFirst = context.getResources().getIdentifier(firstName.toLowerCase() + "win", "drawable", context.getPackageName());
+        int resIdSecond = context.getResources().getIdentifier(secondName.toLowerCase() + "win", "drawable", context.getPackageName());
 
+        if (resIdFirst == 0)
+            resIdFirst = context.getResources().getIdentifier(firstName.toLowerCase() , "drawable", context.getPackageName());
         if (resIdFirst == 0)
             resIdFirst = context.getResources().getIdentifier("default_player_image", "drawable", context.getPackageName());
         ;
         if (resIdSecond == 0)
-            resIdSecond = context.getResources().getIdentifier("default_player_image", "drawable", context.getPackageName());
+            resIdSecond = context.getResources().getIdentifier(secondName.toLowerCase() , "drawable", context.getPackageName());
+        if (resIdSecond == 0)
+        resIdSecond = context.getResources().getIdentifier("default_player_image", "drawable", context.getPackageName());
         ;
 
 

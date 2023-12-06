@@ -30,6 +30,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Data"
+            android:textColor="#FFD700"
             android:textStyle="bold"
             android:gravity="center"
             android:padding="8dp"

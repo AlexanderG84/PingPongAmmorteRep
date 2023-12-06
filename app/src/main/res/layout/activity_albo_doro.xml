@@ -16,15 +16,22 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Albo d'Oro"
+            android:text="Albo d'Oro Giornate"
             android:checked="true"/>
         <RadioButton
             android:id="@+id/radioClassifica"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Classifica"/>
+            android:text="Classifica Piu Albodorati"/>
     </RadioGroup>
+
+    <!-- ListView rimane invariato -->
+    <ListView
+        android:id="@+id/listViewAlboDOro"
+        android:layout_width="match_parent"
+        android:layout_height="100px"
+        android:layout_weight="1"/>
 
     <!-- Secondo RadioGroup con orientamento orizzontale -->
     <RadioGroup
@@ -45,12 +52,12 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="% Vittorie"/>
+        <!-- CheckBox aggiunto -->
+        <CheckBox
+            android:id="@+id/checkBoxOpzione"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Singoli Player"/>
     </RadioGroup>
 
-    <!-- ListView rimane invariato -->
-    <ListView
-        android:id="@+id/listViewAlboDOro"
-        android:layout_width="match_parent"
-        android:layout_height="100px"
-        android:layout_weight="1"/>
 </LinearLayout>

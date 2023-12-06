@@ -8,6 +8,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.pm.PackageManager;
 
 
@@ -17,7 +18,9 @@ import static AuletteBlu.pingpongammorte.LeaderboardActivity.findPlayerByNameWit
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -66,6 +69,7 @@ import java.time.Month;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements DriveInteraction.FirebaseUpdateListener {
@@ -95,6 +99,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 // Logica da eseguire dopo il caricamento di 'players'
 
                 postLoadPlayers();
+                mettiSfondo();
             }
         });
     }
@@ -282,8 +287,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
 
         } catch (Exception e) {
-        e.printStackTrace();
-    }
+            e.printStackTrace();
+        }
     }
     private static final int READ_REQUEST_CODE = 42;
 
@@ -645,23 +650,23 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         void onScoresLoaded(List<Player> players);
     }
 
- public void postLoadPlayers(){
-     this.runOnUiThread(new Runnable() {
-         @Override
-         public void run() {
-             runPostLoadPlayers();
-             if (blockSaving){
-                 layoutSpinner.setBackgroundColor(Color.RED);
-             //saveScoresToPreferences();
-             Toast.makeText(MainActivity.this, "CARICAMENTO FALLITO: DATI INCONSISTENTI. Chiudere e riaprire l'app oppure è possibile solo leggere i dati locali", Toast.LENGTH_SHORT).show();
-         }
-             else
-             layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
-         }
-     });
+    public void postLoadPlayers(){
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                runPostLoadPlayers();
+                if (blockSaving){
+                    layoutSpinner.setBackgroundColor(Color.RED);
+                    //saveScoresToPreferences();
+                    Toast.makeText(MainActivity.this, "CARICAMENTO FALLITO: DATI INCONSISTENTI. Chiudere e riaprire l'app oppure è possibile solo leggere i dati locali", Toast.LENGTH_SHORT).show();
+                }
+                else
+                    layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
+            }
+        });
 
 
- }
+    }
     public void runPostLoadPlayers(){
 
 
@@ -981,59 +986,144 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 // Logica da eseguire dopo il caricamento di 'players'
 
                 postLoadPlayers();
+                mettiSfondo();
             }
         });
     }
 
 
     boolean blockSaving=true;  //se il load da db non è andato a buon fine, dati incostistenti, non permetto di salvarle
-  static  DriveInteraction driveInteraction = new DriveInteraction();
+    static  DriveInteraction driveInteraction = new DriveInteraction();
 
-
+    Context context=null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       // FirebaseApp.initializeApp(getApplicationContext());
+        // FirebaseApp.initializeApp(getApplicationContext());
 
         driveInteraction.initializeFirebase();
         driveInteraction.setUpdateListener(this);
         driveInteraction.startListeningForUpdates();
 
         Log.d("DriveInte FirebaseInit", "Firebase inizializzato con successo");
-            // Supponiamo che tu abbia una lista di giocatori predefinita
-            players = new ArrayList<>(Arrays.asList(
-                    new Player("Talex", 0),
-                    new Player("Pompolus", 0),
-                    new Player("Strino", 0),
-                    new Player("Daniele", 0),
+        // Supponiamo che tu abbia una lista di giocatori predefinita
+        players = new ArrayList<>(Arrays.asList(
+                new Player("Talex", 0),
+                new Player("Pompolus", 0),
+                new Player("Strino", 0),
+                new Player("Daniele", 0),
 
-        new Player("Pompolus - Talex", 0),
-        new Player("Strino - Daniele", 0),
-        new Player("Talex - Daniele", 0),
-        new Player("Strino - Pompolus", 0),
-        new Player("Daniele - Pompolus", 0),
-        new Player("Strino - Talex", 0)
-            ));
+                new Player("Pompolus - Talex", 0),
+                new Player("Strino - Daniele", 0),
+                new Player("Talex - Daniele", 0),
+                new Player("Strino - Pompolus", 0),
+                new Player("Daniele - Pompolus", 0),
+                new Player("Strino - Talex", 0)
+        ));
 
-
+        context=getApplicationContext();
         loadScoresFromPreferences(new LoadScoresCallback() {
             @Override
             public void onScoresLoaded(List<Player> players) {
                 // Logica da eseguire dopo il caricamento di 'players'
 
                 postLoadPlayers();
+
+                mettiSfondo();
+
             }
         });
 
-
-
-
     }
 
-   /* public void _coloraSfondo(boolean res, String winnerName, String loserName){
+    public void mettiSfondo(){
+        List<LocalDate> matchDates = new ArrayList<>();
+        for (Player player : players) {
+            for (Match match : player.getMatches()) {
+                LocalDate matchDate = LocalDate.parse(match.getDate());
+                if (!matchDates.contains(matchDate)) {
+                    matchDates.add(matchDate);
+                }
+            }
+        }
 
+// 2. Trova la data più recente che non sia la data odierna
+        LocalDate today = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            today = LocalDate.now();
+        }
+        LocalDate finalToday = today;
+        LocalDate lastValidDate = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            lastValidDate = matchDates.stream()
+                    .filter(date -> !date.equals(finalToday))
+                    .max(LocalDate::compareTo)
+                    .orElse(null);
+        }
+
+        if (lastValidDate != null) {
+            // 3. Filtra i giocatori e i loro match in base alla data trovata
+            LocalDate finalLastValidDate = lastValidDate;
+            LocalDate finalLastValidDate1 = lastValidDate;
+            Player playerWithMostWins = players.stream()
+                    .filter(player -> !player.getName().contains("-"))
+                    .filter(player -> player.playedOnDate(finalLastValidDate.toString()))
+                    .max(Comparator.comparingInt(player -> countWinsOnDate(player, finalLastValidDate1)))
+                    .orElse(null);
+            System.out.println("Il giocatore con più vittorie: " + playerWithMostWins.getName());
+            String playerName=playerWithMostWins.getName();
+
+            String imageFileName = playerName.toLowerCase() + "win"; // Prova prima con 'win'
+
+            int imageResourceId = getResources().getIdentifier(imageFileName, "drawable", getPackageName());
+            if (imageResourceId == 0) { // Se l'immagine 'win' non esiste
+                imageFileName = playerName.toLowerCase() ; // Prova con il nome normale
+                imageResourceId = getResources().getIdentifier(imageFileName, "drawable", getPackageName());
+                if (imageResourceId == 0) { // Se neanche l'immagine normale esiste
+                    imageResourceId = R.drawable.default_player_image; // Usa l'immagine di default
+                }
+            }
+
+            // Imposta l'immagine come sfondo nel thread UI
+            int finalImageResourceId = imageResourceId;
+            runOnUiThread(() -> {
+                LinearLayout mainLayout = findViewById(R.id.layout_spinner);
+                Drawable originalDrawable = ContextCompat.getDrawable(MainActivity.this, finalImageResourceId);
+
+                // Crea una copia del Drawable originale
+                Drawable playerImage = originalDrawable.getConstantState().newDrawable().mutate();
+
+
+                playerImage.setAlpha(80); // Sostituisci con il valore di alpha desiderato
+
+                mainLayout.setBackground(playerImage);
+            });
+
+        } else {
+            System.out.println("Nessun giocatore soddisfa i criteri");
+        }
+    }
+
+    // Metodo helper per contare le vittorie di un giocatore in una specifica data
+    private int countWinsOnDate(Player player, LocalDate date) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return (int) player.getMatches().stream()
+                    .filter(match -> match.getWinner().equals(player.getName()))
+                    .filter(match -> LocalDate.parse(match.getDate()).equals(date))
+                    .count();
+        }
+        else return 0;
+    }
+
+    private static int countWins(Player player) {
+        return (int) player.getMatches().stream()
+                .filter(match -> match.getWinner().equals(player.getName())) // Conta solo le partite vinte
+                .count();
+    }
+
+    public void coloraSfondo(boolean res, String winnerName, String loserName){
         if(res){
             // Imposta il colore di sfondo verde
             layoutSpinner.setBackgroundColor(Color.GREEN);
@@ -1042,52 +1132,22 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             final Dialog dialog = new Dialog(this); // Assicurati che 'this' sia un Context valido
             dialog.setContentView(R.layout.dialog_layout);
 
-            // Imposta le immagini nel dialog
-            ImageView imageView1 = dialog.findViewById(R.id.imageView1);
-            ImageView imageView2 = dialog.findViewById(R.id.imageView2);
+            // Ottieni le ImageView dal layout
+            ImageView imageViewWinnerTop = dialog.findViewById(R.id.imageViewWinnerTop);
+            ImageView imageViewWinnerBottom = dialog.findViewById(R.id.imageViewWinnerBottom);
+            ImageView imageViewLoserTop = dialog.findViewById(R.id.imageViewLoserTop);
+            ImageView imageViewLoserBottom = dialog.findViewById(R.id.imageViewLoserBottom);
 
-
-            int resIdFirst = getApplication().getResources().getIdentifier(winnerName.toLowerCase(), "drawable", getApplication().getPackageName());
-
-            if (resIdFirst != 0) {
-                imageView1.setImageResource(resIdFirst);
-            } else {
-                imageView1.setImageResource(R.drawable.default_player_image); // Immagine di default se non trovata
-            }
-
-            int resIdFirst2 = getApplication().getResources().getIdentifier(loserName.toLowerCase(), "drawable", getApplication().getPackageName());
-
-            if (resIdFirst2 != 0) {
-                imageView2.setImageResource(resIdFirst2);
-            } else {
-                imageView2.setImageResource(R.drawable.default_player_image); // Immagine di default se non trovata
-            }
-
-
-
-
+            // Gestisci la visibilità e imposta le immagini per vincitori e perdenti
+            handlePlayerImageViews(new ImageView[]{imageViewWinnerTop, imageViewWinnerBottom}, winnerName, true);
+            handlePlayerImageViews(new ImageView[]{imageViewLoserTop, imageViewLoserBottom}, loserName, false);
 
             dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
             dialog.show();
 
-
-            // Avvia l'animazione di ingrandimento per l'immagine di sinistra
-            ObjectAnimator scaleXAnimatorLeft = ObjectAnimator.ofFloat(imageView1, "scaleX", 1f, 2f);
-            ObjectAnimator scaleYAnimatorLeft = ObjectAnimator.ofFloat(imageView1, "scaleY", 1f, 2f);
-            scaleXAnimatorLeft.setDuration(1500);
-            scaleYAnimatorLeft.setDuration(1500);
-            scaleXAnimatorLeft.start();
-            scaleYAnimatorLeft.start();
-
-            // Avvia le animazioni di ridimensionamento e rotazione per l'immagine di destra
-            ObjectAnimator scaleXAnimatorRight = ObjectAnimator.ofFloat(imageView2, "scaleX", 1f, 0.5f);
-            ObjectAnimator scaleYAnimatorRight = ObjectAnimator.ofFloat(imageView2, "scaleY", 1f, 0.5f);
-            ObjectAnimator rotationAnimatorRight = ObjectAnimator.ofFloat(imageView2, "rotation", 0f, 180f);
-
-            AnimatorSet animatorSetRight = new AnimatorSet();
-            animatorSetRight.playTogether(scaleXAnimatorRight, scaleYAnimatorRight, rotationAnimatorRight);
-            animatorSetRight.setDuration(1500); // Durata dell'animazione
-            animatorSetRight.start();
+            // Applica le animazioni
+            applyAnimation(new ImageView[]{imageViewWinnerTop, imageViewWinnerBottom}, true);
+            applyAnimation(new ImageView[]{imageViewLoserTop, imageViewLoserBottom}, false);
 
             // Handler per chiudere la dialog dopo un ritardo
             new Handler().postDelayed(new Runnable() {
@@ -1097,68 +1157,17 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                     layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
                 }
             }, 1500); // Ritardo in millisecondi
-
-        }else {
-
-            // Imposta il colore di sfondo rosso
+        } else {
+            // Imposta il colore di sfondo rosso e ritarda il ripristino del colore
             layoutSpinner.setBackgroundColor(Color.RED);
-
-// Utilizza un Handler per ritardare il ripristino del colore di sfondo
             new Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    // Ripristina il colore di sfondo originale (o imposta un altro colore desiderato)
-                    layoutSpinner.setBackgroundColor(Color.TRANSPARENT); // Usato qui come esempio, puoi impostare il colore originale o un altro colore
+                    layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
                 }
-            }, 500); // 2000 millisecondi (2 secondi)
+            }, 500);
         }
     }
-*/
-   public void coloraSfondo(boolean res, String winnerName, String loserName){
-       if(res){
-           // Imposta il colore di sfondo verde
-           layoutSpinner.setBackgroundColor(Color.GREEN);
-
-           // Crea e mostra la Dialog
-           final Dialog dialog = new Dialog(this); // Assicurati che 'this' sia un Context valido
-           dialog.setContentView(R.layout.dialog_layout);
-
-           // Ottieni le ImageView dal layout
-           ImageView imageViewWinnerTop = dialog.findViewById(R.id.imageViewWinnerTop);
-           ImageView imageViewWinnerBottom = dialog.findViewById(R.id.imageViewWinnerBottom);
-           ImageView imageViewLoserTop = dialog.findViewById(R.id.imageViewLoserTop);
-           ImageView imageViewLoserBottom = dialog.findViewById(R.id.imageViewLoserBottom);
-
-           // Gestisci la visibilità e imposta le immagini per vincitori e perdenti
-           handlePlayerImageViews(new ImageView[]{imageViewWinnerTop, imageViewWinnerBottom}, winnerName, true);
-           handlePlayerImageViews(new ImageView[]{imageViewLoserTop, imageViewLoserBottom}, loserName, false);
-
-           dialog.getWindow().setLayout(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT);
-           dialog.show();
-
-           // Applica le animazioni
-           applyAnimation(new ImageView[]{imageViewWinnerTop, imageViewWinnerBottom}, true);
-           applyAnimation(new ImageView[]{imageViewLoserTop, imageViewLoserBottom}, false);
-
-           // Handler per chiudere la dialog dopo un ritardo
-           new Handler().postDelayed(new Runnable() {
-               @Override
-               public void run() {
-                   dialog.dismiss();
-                   layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
-               }
-           }, 1500); // Ritardo in millisecondi
-       } else {
-           // Imposta il colore di sfondo rosso e ritarda il ripristino del colore
-           layoutSpinner.setBackgroundColor(Color.RED);
-           new Handler().postDelayed(new Runnable() {
-               @Override
-               public void run() {
-                   layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
-               }
-           }, 500);
-       }
-   }
 
     // Metodo per gestire la visibilità e impostare le immagini dei giocatori
     private void handlePlayerImageViews(ImageView[] imageViews, String playerName, boolean isWinner) {
