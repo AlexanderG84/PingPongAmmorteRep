@@ -6,6 +6,7 @@ import static AuletteBlu.pingpongammorte.MatchUtils.removeMatchesWithId;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +17,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
@@ -24,6 +26,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.gson.Gson;
 
@@ -174,7 +177,7 @@ public class MatchActivity extends AppCompatActivity {
         // Recupera la lista di giocatori dall'Intent
         //players = (ArrayList<Player>) getIntent().getSerializableExtra("players");
         players=MainActivity.players;
-
+        mettiSfondo();
         player1Spinner = findViewById(R.id.player1_spinner);
         player2Spinner = findViewById(R.id.player2_spinner);
         dateSpinner = findViewById(R.id.date_spinner);
@@ -190,6 +193,40 @@ public class MatchActivity extends AppCompatActivity {
 
         updateMatches();
     }
+
+    public void mettiSfondo(){
+
+        String playerName=MainActivity.playerName;
+
+        String imageFileName = playerName.toLowerCase() + "win"; // Prova prima con 'win'
+
+        int imageResourceId = getResources().getIdentifier(imageFileName, "drawable", getPackageName());
+        if (imageResourceId == 0) { // Se l'immagine 'win' non esiste
+            imageFileName = playerName.toLowerCase() ; // Prova con il nome normale
+            imageResourceId = getResources().getIdentifier(imageFileName, "drawable", getPackageName());
+            if (imageResourceId == 0) { // Se neanche l'immagine normale esiste
+                imageResourceId = R.drawable.default_player_image; // Usa l'immagine di default
+            }
+        }
+
+        // Imposta l'immagine come sfondo nel thread UI
+        int finalImageResourceId = imageResourceId;
+        runOnUiThread(() -> {
+            LinearLayout mainLayout = findViewById(R.id.layout_spinner3);
+            Drawable originalDrawable = ContextCompat.getDrawable(MatchActivity.this, finalImageResourceId);
+
+            // Crea una copia del Drawable originale
+            Drawable playerImage = originalDrawable.getConstantState().newDrawable().mutate();
+
+
+            playerImage.setAlpha(80); // Sostituisci con il valore di alpha desiderato
+
+            mainLayout.setBackground(playerImage);
+        });
+
+
+    }
+
 
     private void setupSpinners() {
         // Configura gli Spinner con la lista dei nomi dei giocatori che hanno match di tipo "pp"

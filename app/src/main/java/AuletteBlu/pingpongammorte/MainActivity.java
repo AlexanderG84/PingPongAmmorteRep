@@ -88,6 +88,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
     Button btnClearPlayers;
     Button btnMockPlayer;
 
+    static String playerName="";
+
     public static ArrayList<Player> players; // Popolato con i dati
     private List<Player> mockPlayers; // Popolato con i dati
 
@@ -1030,7 +1032,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 // Logica da eseguire dopo il caricamento di 'players'
 
                 postLoadPlayers();
-
+                foundImgSfondo();
                 mettiSfondo();
 
             }
@@ -1038,7 +1040,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
     }
 
-    public void mettiSfondo(){
+    public void foundImgSfondo(){
         List<LocalDate> matchDates = new ArrayList<>();
         for (Player player : players) {
             for (Match match : player.getMatches()) {
@@ -1073,7 +1075,10 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                     .max(Comparator.comparingInt(player -> countWinsOnDate(player, finalLastValidDate1)))
                     .orElse(null);
             System.out.println("Il giocatore con più vittorie: " + playerWithMostWins.getName());
-            String playerName=playerWithMostWins.getName();
+            playerName = playerWithMostWins.getName();
+        }
+    }
+    public void mettiSfondo(){
 
             String imageFileName = playerName.toLowerCase() + "win"; // Prova prima con 'win'
 
@@ -1101,9 +1106,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 mainLayout.setBackground(playerImage);
             });
 
-        } else {
-            System.out.println("Nessun giocatore soddisfa i criteri");
-        }
+
     }
 
     // Metodo helper per contare le vittorie di un giocatore in una specifica data

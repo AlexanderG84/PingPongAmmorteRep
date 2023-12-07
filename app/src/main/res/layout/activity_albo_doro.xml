@@ -1,5 +1,17 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <ImageView
+        android:id="@+id/background_image4"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_spinner4"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -31,6 +43,8 @@
         android:id="@+id/listViewAlboDOro"
         android:layout_width="match_parent"
         android:layout_height="100px"
+        android:divider="@drawable/divider"
+        android:dividerHeight="2dp"
         android:layout_weight="1"/>
 
     <!-- Secondo RadioGroup con orientamento orizzontale -->
@@ -61,3 +75,4 @@
     </RadioGroup>
 
 </LinearLayout>
+</FrameLayout>

@@ -25,7 +25,8 @@
         android:paddingLeft="10dp">
 
         <!-- Le TextView -->
-        <TextView
+
+        <AuletteBlu.pingpongammorte.BorderedTextView
             android:id="@+id/playerDate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageView
+        android:id="@+id/background_image3"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop" />
+
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/layout_spinner3"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -39,6 +51,8 @@
         android:id="@+id/match_list_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:divider="@drawable/divider"
+        android:dividerHeight="2dp"
         android:layout_weight="1" />
     <LinearLayout
         android:layout_width="match_parent"
@@ -64,3 +78,4 @@
     </LinearLayout>
 
 </LinearLayout>
+</FrameLayout>

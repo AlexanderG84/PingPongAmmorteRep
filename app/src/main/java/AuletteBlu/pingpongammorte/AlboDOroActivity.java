@@ -4,16 +4,19 @@ import static AuletteBlu.pingpongammorte.LeaderboardActivity.deepCloneList;
 import static AuletteBlu.pingpongammorte.LeaderboardActivity.deepClonePlayer;
 import static AuletteBlu.pingpongammorte.LeaderboardActivity.findPlayerByNameWithoutCloning;
 
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -33,6 +36,42 @@ public class AlboDOroActivity extends AppCompatActivity {
     private Map<String, List<Player>> playersByDate; // Mappa dei giocatori per data
     private PlayerAdapterAlbo adapter;
     private List<Player> filteredPlayers;
+
+
+    public void mettiSfondo(){
+
+        String playerName=MainActivity.playerName;
+
+        String imageFileName = playerName.toLowerCase() + "win"; // Prova prima con 'win'
+
+        int imageResourceId = getResources().getIdentifier(imageFileName, "drawable", getPackageName());
+        if (imageResourceId == 0) { // Se l'immagine 'win' non esiste
+            imageFileName = playerName.toLowerCase() ; // Prova con il nome normale
+            imageResourceId = getResources().getIdentifier(imageFileName, "drawable", getPackageName());
+            if (imageResourceId == 0) { // Se neanche l'immagine normale esiste
+                imageResourceId = R.drawable.default_player_image; // Usa l'immagine di default
+            }
+        }
+
+        // Imposta l'immagine come sfondo nel thread UI
+        int finalImageResourceId = imageResourceId;
+        runOnUiThread(() -> {
+            LinearLayout mainLayout = findViewById(R.id.layout_spinner4);
+            Drawable originalDrawable = ContextCompat.getDrawable(AlboDOroActivity.this, finalImageResourceId);
+
+            // Crea una copia del Drawable originale
+            Drawable playerImage = originalDrawable.getConstantState().newDrawable().mutate();
+
+
+            playerImage.setAlpha(80); // Sostituisci con il valore di alpha desiderato
+
+            mainLayout.setBackground(playerImage);
+        });
+
+
+    }
+
+
 
     private List<PlayerWithDate> calculateAlboDOro() {
         // Mappa per tenere traccia dei giocatori e delle loro vittorie per ogni giorno
@@ -229,6 +268,7 @@ public class AlboDOroActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_albo_doro);
 
+        mettiSfondo();
         listView = findViewById(R.id.listViewAlboDOro);
         radioGroupSelection = findViewById(R.id.radioGroupSelection);
         radioGroupMetric = findViewById(R.id.radioGroupMetric);

@@ -2,6 +2,8 @@ package AuletteBlu.pingpongammorte;
 
 
 
+import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
@@ -9,10 +11,12 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -142,6 +147,7 @@ public class LeaderboardActivity extends AppCompatActivity {
         leaderboardListView = findViewById(R.id.listView_leaderboard);
         players =MainActivity.players;
 
+        mettiSfondo();
         //players = (ArrayList<Player>) getIntent().getSerializableExtra("players");
         //loadScoresFromPreferences();
 
@@ -265,6 +271,50 @@ public class LeaderboardActivity extends AppCompatActivity {
 
     }
 
+
+    // Metodo helper per contare le vittorie di un giocatore in una specifica data
+    private int countWinsOnDate(Player player, LocalDate date) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return (int) player.getMatches().stream()
+                    .filter(match -> match.getWinner().equals(player.getName()))
+                    .filter(match -> LocalDate.parse(match.getDate()).equals(date))
+                    .count();
+        }
+        else return 0;
+    }
+
+    public void mettiSfondo(){
+
+            String playerName=MainActivity.playerName;
+
+            String imageFileName = playerName.toLowerCase() + "win"; // Prova prima con 'win'
+
+            int imageResourceId = getResources().getIdentifier(imageFileName, "drawable", getPackageName());
+            if (imageResourceId == 0) { // Se l'immagine 'win' non esiste
+                imageFileName = playerName.toLowerCase() ; // Prova con il nome normale
+                imageResourceId = getResources().getIdentifier(imageFileName, "drawable", getPackageName());
+                if (imageResourceId == 0) { // Se neanche l'immagine normale esiste
+                    imageResourceId = R.drawable.default_player_image; // Usa l'immagine di default
+                }
+            }
+
+            // Imposta l'immagine come sfondo nel thread UI
+            int finalImageResourceId = imageResourceId;
+            runOnUiThread(() -> {
+                LinearLayout mainLayout = findViewById(R.id.layout_spinner2);
+                Drawable originalDrawable = ContextCompat.getDrawable(LeaderboardActivity.this, finalImageResourceId);
+
+                // Crea una copia del Drawable originale
+                Drawable playerImage = originalDrawable.getConstantState().newDrawable().mutate();
+
+
+                playerImage.setAlpha(80); // Sostituisci con il valore di alpha desiderato
+
+                mainLayout.setBackground(playerImage);
+            });
+
+
+    }
 
     private void updateLeaderboardBasedOnPairPlayersMode() {
 
