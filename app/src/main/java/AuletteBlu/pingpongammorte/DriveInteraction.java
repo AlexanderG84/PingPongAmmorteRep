@@ -19,6 +19,8 @@ public class DriveInteraction {
 
     //private  DatabaseReference databaseRef = FirebaseDatabase.getInstance().getReference();
 
+    private boolean firstInteraction = true;
+
     private DatabaseReference databaseRef;
 
 
@@ -101,6 +103,7 @@ public class DriveInteraction {
         databaseRef.updateChildren(updates)
                 .addOnSuccessListener(aVoid -> Log.e("Firebase Write", "Dati caricati con successo"))
                 .addOnFailureListener(e -> Log.e("Firebase Write", "Errore durante il caricamento dei dati", e));
+        recordAccess(MainActivity.uniqueID, "read");
     }
 
     public  void getLastModified(ValueEventListener callback) {
@@ -138,6 +141,8 @@ public class DriveInteraction {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        recordAccess(MainActivity.uniqueID, "read");
+
         return jsonRef.get();
     }
 
@@ -178,5 +183,34 @@ public class DriveInteraction {
     public interface FirebaseUpdateListener {
         void onFirebaseDataChanged();
     }
+
+    public void recordAccess(String userId, String actionType) {
+        if (!firstInteraction || userId.equals("1442eea5-2d3c-42f8-a693-fd98f33d8549"))
+        return;
+        try {
+            firstInteraction = false;
+
+           // DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(formattedDate); // Usa il timestamp formattato come chiave diretta
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+            String formattedDate = formatter.format(new Date());
+
+            DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(formattedDate); // Usa il timestamp formattato come chiave diretta
+
+
+            Map<String, Object> logData = new HashMap<>();
+            logData.put("timestamp", formattedDate); // Usa la data formattata
+
+            userLogRef.setValue(logData)
+                    .addOnSuccessListener(aVoid -> Log.e("Firebase Access Log", "Accesso registrato con successo"))
+                    .addOnFailureListener(e -> Log.e("Firebase Access Log", "Errore durante la registrazione dell'accesso", e));
+
+             // Imposta la variabile su false dopo il primo accesso
+
+            firstInteraction=false;
+        } catch (Exception e) {
+
+        }
+    }
+
 
 }

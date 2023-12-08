@@ -9,6 +9,7 @@ import android.app.Dialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 
 
@@ -71,8 +72,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements DriveInteraction.FirebaseUpdateListener {
+
+    private static final String PREFS_NAME = "MyAppPrefs";
+    private static final String UNIQUE_ID_KEY = "unique_id";
+    public static String uniqueID;
 
     LinearLayout layoutSpinner;
     private static final int MY_PERMISSIONS_REQUEST_STORAGE = 1;
@@ -1008,6 +1014,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        uniqueID = getUniqueID();
+
         // FirebaseApp.initializeApp(getApplicationContext());
 
         driveInteraction.initializeFirebase();
@@ -1342,7 +1350,24 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
     }
 
 
+    private String getUniqueID() {
+        SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String id = prefs.getString(UNIQUE_ID_KEY, null);
 
+        if (id == null) {
+            // Genera un nuovo ID univoco
+            id = UUID.randomUUID().toString();
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(UNIQUE_ID_KEY, id);
+            editor.apply();
+        }
+
+        return id;
+    }
+
+    public String getMyUniqueID() {
+        return uniqueID;
+    }
 
 
     private void setupPlayerSpinners() {
