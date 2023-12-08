@@ -349,6 +349,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 is.close();
                 updateAdapter();
                 saveScoresToPreferences();
+                foundImgSfondo();
+                mettiSfondo();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -761,7 +763,10 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 // Seleziona il RadioButton che è stato cliccato.
                 ((RadioButton) v).setChecked(true);
                 matchType = ((RadioButton) v).getText().toString();
+
                 refreshSpinner();
+                foundImgSfondo();
+                mettiSfondo();
             }
         };
 
@@ -1041,41 +1046,63 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
     }
 
     public void foundImgSfondo(){
-        List<LocalDate> matchDates = new ArrayList<>();
-        for (Player player : players) {
-            for (Match match : player.getMatches()) {
-                LocalDate matchDate = LocalDate.parse(match.getDate());
-                if (!matchDates.contains(matchDate)) {
-                    matchDates.add(matchDate);
+        try {
+            List<LocalDate> matchDates = new ArrayList<>();
+            for (Player player : players) {
+                for (Match match : player.getMatches()) {
+                    if(match.type.equals(matchType)){
+                    LocalDate matchDate = LocalDate.parse(match.getDate());
+                    if (!matchDates.contains(matchDate)) {
+                        matchDates.add(matchDate);
+                    }
+                    }
                 }
             }
-        }
 
 // 2. Trova la data più recente che non sia la data odierna
-        LocalDate today = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            today = LocalDate.now();
-        }
-        LocalDate finalToday = today;
-        LocalDate lastValidDate = null;
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            lastValidDate = matchDates.stream()
-                    .filter(date -> !date.equals(finalToday))
-                    .max(LocalDate::compareTo)
-                    .orElse(null);
-        }
+            LocalDate today = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                today = LocalDate.now();
+            }
+            LocalDate finalToday = today;
+            LocalDate lastValidDate = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                lastValidDate = matchDates.stream()
+                        .filter(date -> !date.equals(finalToday))
+                        .max(LocalDate::compareTo)
+                        .orElse(null);
+            }
 
-        if (lastValidDate != null) {
-            // 3. Filtra i giocatori e i loro match in base alla data trovata
-            LocalDate finalLastValidDate = lastValidDate;
-            LocalDate finalLastValidDate1 = lastValidDate;
-            Player playerWithMostWins = players.stream()
-                    .filter(player -> !player.getName().contains("-"))
-                    .filter(player -> player.playedOnDate(finalLastValidDate.toString()))
-                    .max(Comparator.comparingInt(player -> countWinsOnDate(player, finalLastValidDate1)))
-                    .orElse(null);
-            System.out.println("Il giocatore con più vittorie: " + playerWithMostWins.getName());
-            playerName = playerWithMostWins.getName();
+            List<Player> clonedPlayers=deepCloneList(players);
+            if(matchType.toLowerCase().contains("2v2")){
+
+                clonedPlayers=createIndividualPlayersList(clonedPlayers);
+            }
+            if (lastValidDate != null) {
+                LocalDate finalLastValidDate = lastValidDate;
+                int maxWins = clonedPlayers.stream()
+                        .filter(player -> !player.getName().contains("-"))
+                        .filter(player -> player.playedOnDate(finalLastValidDate.toString()))
+                        .mapToInt(player -> countWinsOnDate(player, finalLastValidDate))
+                        .max()
+                        .orElse(0);
+
+                Player playerWithMostWins = clonedPlayers.stream()
+                        .filter(player -> !player.getName().contains("-"))
+                        .filter(player -> player.playedOnDate(finalLastValidDate.toString()))
+                        .filter(player -> countWinsOnDate(player, finalLastValidDate) == maxWins)
+                        .max(Comparator.comparingDouble(player -> countPercWinsOnDate(player, finalLastValidDate)))
+                        .orElse(null);
+
+                if (playerWithMostWins != null) {
+                    System.out.println("Il giocatore con più vittorie (e percentuale più alta in caso di parità): " + playerWithMostWins.getName());
+                    playerName = playerWithMostWins.getName();
+                } else {
+                    playerName = "";
+                }
+            } else playerName = "";
+        } catch (Exception e) {
+            playerName="";
         }
     }
     public void mettiSfondo(){
@@ -1120,11 +1147,20 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         else return 0;
     }
 
-    private static int countWins(Player player) {
-        return (int) player.getMatches().stream()
-                .filter(match -> match.getWinner().equals(player.getName())) // Conta solo le partite vinte
-                .count();
+
+    private double countPercWinsOnDate(Player player, LocalDate date) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            long wins = player.getMatches().stream()
+                    .filter(match -> match.getWinner().equals(player.getName()))
+                    .filter(match -> LocalDate.parse(match.getDate()).equals(date))
+                    .count();
+            long played = player.getMatches().size();
+
+            return played > 0 ? (double) wins / played * 100 : 0;
+        } else return 0;
     }
+
+
 
     public void coloraSfondo(boolean res, String winnerName, String loserName){
         if(res){
@@ -1158,6 +1194,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 public void run() {
                     dialog.dismiss();
                     layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
+                    mettiSfondo();
                 }
             }, 1500); // Ritardo in millisecondi
         } else {
@@ -1167,8 +1204,80 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 @Override
                 public void run() {
                     layoutSpinner.setBackgroundColor(Color.TRANSPARENT);
+                    mettiSfondo();
                 }
             }, 500);
+        }
+        mettiSfondo();
+    }
+
+    private List<Player> createIndividualPlayersList(List<Player> originalPlayers) {
+        List<Player> individualPlayers = new ArrayList<>();
+
+        for (Player originalPlayer : originalPlayers) {
+            if ( originalPlayer.getName().contains("-")) {
+                // Se siamo in modalità coppie e il nome contiene "-", scomponi i giocatori
+                String[] playerNames = originalPlayer.getName().split(" - ");
+                for (String playerName : playerNames) {
+                    // Controlla se il giocatore singolo è già stato aggiunto agli individualPlayers
+                    Player existingIndividualPlayer = findPlayerByNameWithoutCloning(individualPlayers, playerName);
+                    if (existingIndividualPlayer != null) {
+                        // Aggiorna i dati del giocatore esistente in base ai match della coppia
+                        updateIndividualPlayerData(existingIndividualPlayer, originalPlayer.getMatches());
+                    } else {
+                        // Se il giocatore singolo non è presente, crea un nuovo giocatore individuale
+                        Player individualPlayer = new Player(playerName, 0);  // Inizializza il giocatore singolo con punteggio 0
+                        // Aggiungi il nuovo giocatore alla lista degli individuali
+                        individualPlayers.add(individualPlayer);
+                        // Aggiorna i dati del nuovo giocatore in base ai match della coppia
+                        updateIndividualPlayerData(individualPlayer, originalPlayer.getMatches());
+                    }
+                }
+            } else {
+                // Altrimenti, aggiungi il giocatore originale alla lista
+                individualPlayers.add(originalPlayer);
+            }
+        }
+
+        return individualPlayers;
+    }
+
+    private void updateIndividualPlayerData(Player individualPlayer, List<Match> matches) {
+        for (Match originalMatch : matches) {
+            if (originalMatch.getWinner().contains("-")) {
+                // Se il vincitore è una coppia, crea due nuovi match con vincitori singoli
+                String[] winners = originalMatch.getWinner().split(" - ");
+                for (String winner : winners) {
+
+                    if (winner.equals(individualPlayer.getName())) {
+                        Match individualMatch = new Match(winner, originalMatch.getLoser().split(" - ")[0], originalMatch.getDate(),
+                                originalMatch.type, originalMatch.scoreWinner, originalMatch.scoreLoser, originalMatch.getHour(), originalMatch.id_timestamp);
+                        individualPlayer.addMatch(individualMatch);
+                        individualPlayer.setScore(individualPlayer.getScore() + 1);
+                        individualPlayer.score+=1;
+                    }
+                }
+
+                // Se il vincitore è una coppia, crea due nuovi match con vincitori singoli
+                String[] losers = originalMatch.getLoser().split(" - ");
+                for (String loser : losers) {
+                    if (loser.equals(individualPlayer.getName())) {
+                        Match individualMatch = new Match(originalMatch.getWinner().split(" - ")[0], loser, originalMatch.getDate(),
+                                originalMatch.type, originalMatch.scoreWinner, originalMatch.scoreLoser, originalMatch.getHour(), originalMatch.id_timestamp);
+                        individualPlayer.addMatch(individualMatch);
+                        individualPlayer.score+=1;
+                    }
+                }
+
+            } else {
+                // Se il vincitore è già un singolo giocatore, crea un nuovo match identico
+                Match individualMatch = new Match(originalMatch.getWinner(), originalMatch.getLoser(),
+                        originalMatch.getDate(), originalMatch.type, originalMatch.scoreWinner,
+                        originalMatch.scoreLoser, originalMatch.getHour(),originalMatch.id_timestamp);
+                individualPlayer.addMatch(individualMatch);
+                individualPlayer.setScore(individualPlayer.getScore()+1);
+                individualPlayer.score+=1;
+            }
         }
     }
 

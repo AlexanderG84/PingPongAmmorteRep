@@ -152,6 +152,7 @@
         android:layout_marginTop="10dp"
         android:textColor="#008000"
         android:textStyle="bold"
+        android:fontFamily="Comic Sans"
         android:text="Salva la Partita" />
 
     <!-- Linea di separazione -->
@@ -169,6 +170,7 @@
         android:layout_marginTop="10dp"
         android:textColor="#FF0000"
         android:textStyle="bold"
+        android:fontFamily="Cursive"
         android:text="Vedi Classifica" />
 
     <Button
@@ -178,6 +180,7 @@
         android:textColor="#FF0000"
         android:textStyle="bold"
         android:layout_marginTop="5dp"
+        android:fontFamily="Monospace"
         android:text="Storico Sfide" />
 
     <Button
@@ -186,6 +189,7 @@
         android:layout_height="wrap_content"
         android:textColor="#FFD700"
         android:textStyle="bold"
+        android:fontFamily="Serif"
         android:layout_marginTop="20dp"
         android:text="ALBO D'ORO" />
 
@@ -195,6 +199,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="40dp"
         android:textStyle="bold"
+        android:fontFamily="Sans-serif Condensed"
         android:text="Salva Backup" />
 
     <Button
@@ -202,6 +207,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold"
+        android:fontFamily="Lobster"
         android:text="Carica Backup" />
 
     <LinearLayout
