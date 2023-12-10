@@ -1039,15 +1039,15 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
         uniqueID = getUniqueID();
 
- 
+
         // Ottieni il riferimento al TextView
         TextView versionTextView = findViewById(R.id.app_version);
 
 // Ottieni la versione dell'app dalla configurazione del pacchetto
     //    String versionName = BuildConfig.VERSION_NAME;
 
-// Imposta il testo del TextView con la versione dell'app
 
+        
 
 
             try {
