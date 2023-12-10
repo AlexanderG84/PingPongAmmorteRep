@@ -1,5 +1,7 @@
 package AuletteBlu.pingpongammorte;
 
+import static AuletteBlu.pingpongammorte.MainActivity.matchType;
+
 import com.google.gson.Gson;
 
 import java.io.Serializable;
@@ -22,7 +24,7 @@ public class Player implements Serializable {
 
     public int getVictoriesOnDate(List<Player> players,String date, boolean returnType) {
 
-        getMatchesOnDateWithOpponents(players.stream().map(Player::getName).collect(Collectors.toList()) , date, MainActivity.matchType);
+        getMatchesOnDateWithOpponents(players.stream().map(Player::getName).collect(Collectors.toList()) , date, matchType);
         int intValue = (int) victoryPercentage;
         if(!returnType)
             return score;
@@ -42,7 +44,7 @@ public class Player implements Serializable {
     public List<String> getAllVictoryDates() {
         List<String> dates = new ArrayList<>();
         for (Match match : matches) {
-            if (match.getWinner().equals(this.name) && match.type.equals(MainActivity.matchType)) {
+            if (match.getWinner().equals(this.name) && match.type.equals(matchType)) {
                 if (!dates.contains(match.getDate())) {
                     dates.add(match.getDate());
                 }
@@ -112,7 +114,7 @@ public class Player implements Serializable {
     }
     public boolean playedOnDate(String date) {
         for (Match match : matches) {
-            if (match.getDate().equals(date)) {
+            if (match.type.equals(matchType)&&match.getDate().equals(date)) {
                 return true;  // Il giocatore ha giocato una partita in questa data.
             }
         }
