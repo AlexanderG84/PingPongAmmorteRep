@@ -2,8 +2,8 @@ name: Android CI/CD
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - Release # Il flusso di lavoro sarà attivato solo quando fai push su un branch chiamato "Release"
 
 jobs:
   build:
@@ -30,14 +30,22 @@ jobs:
         name: app-debug.apk
         path: app/build/outputs/apk/debug/app-debug.apk
 
+    - name: Get Version Name from build.gradle
+      id: get_version_name
+      run: |
+        versionName=$(grep -oP 'versionName "[0-9.]*"' app/build.gradle | grep -oP '"[0-9.]+"')
+        echo "Version Name: $versionName"
+        echo "::set-output name=version_name::$versionName"
+      shell: bash
+
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
+        tag_name: v${{ steps.get_version_name.outputs.version_name }} # Utilizza il versionName come nome del tag
+        release_name: Release v${{ steps.get_version_name.outputs.version_name }} # Utilizza il versionName come nome del rilascio
         draft: false
         prerelease: false
 
