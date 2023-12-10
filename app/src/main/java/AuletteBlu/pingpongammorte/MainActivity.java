@@ -1082,7 +1082,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 }
 
 
-                
+
 
         // FirebaseApp.initializeApp(getApplicationContext());
 
