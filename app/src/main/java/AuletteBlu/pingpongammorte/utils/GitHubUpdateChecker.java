@@ -1,5 +1,7 @@
 package AuletteBlu.pingpongammorte.utils;
 
+import static AuletteBlu.pingpongammorte.utils.UpdateManager.GITHUB_BRANCH;
+
 import com.github.javiersantos.appupdater.BuildConfig;
 
 import retrofit2.Call;
@@ -21,7 +23,7 @@ public class GitHubUpdateChecker {
 
         GitHubApiService apiService = retrofit.create(GitHubApiService.class);
 
-        Call<UpdateManager.GitHubRelease> call = apiService.getLatestRelease(GITHUB_OWNER, GITHUB_REPO);
+        Call<UpdateManager.GitHubRelease> call = apiService.getLatestRelease(GITHUB_OWNER, GITHUB_REPO,GITHUB_BRANCH);
 
         call.enqueue(new Callback<UpdateManager.GitHubRelease>() {
             @Override

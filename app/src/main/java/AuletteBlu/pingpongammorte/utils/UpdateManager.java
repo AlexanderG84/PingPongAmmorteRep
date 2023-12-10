@@ -39,6 +39,8 @@ public class UpdateManager {
     private static final String GITHUB_OWNER = "AlexanderG84";
     private static final String GITHUB_REPO = "PingPongAmmorteRep";
 
+    public static final String GITHUB_BRANCH = "Release";
+
     private Context context;
     private Retrofit retrofit;
     private GitHubApiService apiService;
@@ -55,7 +57,7 @@ public class UpdateManager {
     }
 
     public void checkForUpdates() {
-        Call<GitHubRelease> call = apiService.getLatestRelease(GITHUB_OWNER, GITHUB_REPO);
+        Call<GitHubRelease> call = apiService.getLatestRelease(GITHUB_OWNER, GITHUB_REPO,GITHUB_BRANCH);
         call.enqueue(new Callback<GitHubRelease>() {
             @Override
             public void onResponse(Call<GitHubRelease> call, Response<GitHubRelease> response) {
