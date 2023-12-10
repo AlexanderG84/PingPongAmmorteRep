@@ -19,12 +19,26 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        release {
+            storeFile file('app/keystore/keystore_pp.jks') // Percorso del keystore
+            storePassword 'pingpong' // La password del keystore
+            keyAlias 'key_pp' // L'alias della chiave
+            keyPassword 'pingpong' // La password della chiave
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+        debug {
+            signingConfig signingConfigs.release // Usa la stessa firma per il debug
+        }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
