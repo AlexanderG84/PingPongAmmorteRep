@@ -2,11 +2,13 @@ package AuletteBlu.pingpongammorte.utils;
 
 import static AuletteBlu.pingpongammorte.MainActivity.packageInfo;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import androidx.core.content.FileProvider;
@@ -165,19 +167,91 @@ public class UpdateManager {
         }
     }
 
-    private void installApk(File apkFile) {
-        Log.e("InstallAPK", "Attempting to install APK");
-        Uri apkUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", apkFile);
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+    public void copyApkToDownloadFolder(File sourceFile) {
         try {
-            context.startActivity(intent);
-        } catch (Exception e) {
-            Log.e("InstallAPK", "Error installing APK: " + e.getMessage());
-        }
+            File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File destinationFile = new File(downloadFolder, sourceFile.getName());
 
+            // Create ContentValues for the new file
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Downloads.DISPLAY_NAME, destinationFile.getName());
+            values.put(MediaStore.Downloads.MIME_TYPE, "application/vnd.android.package-archive");
+            values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+
+            // Insert the new file into the MediaStore
+            Uri uri = context.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+
+            // Write the APK file's contents to the output stream
+            try (OutputStream os = context.getContentResolver().openOutputStream(uri)) {
+                if (os != null) {
+                    FileInputStream inputStream = new FileInputStream(sourceFile);
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = inputStream.read(buffer)) > 0) {
+                        os.write(buffer, 0, length);
+                    }
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void _copyApkToDownloadFolder(File sourceFile) {
+        try {
+            File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File destinationFile = new File(downloadFolder, sourceFile.getName());
+
+            FileInputStream inputStream = new FileInputStream(sourceFile);
+            FileOutputStream outputStream = new FileOutputStream(destinationFile);
+
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+
+            inputStream.close();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void installApk(File apkFile) {
+        if (apkFile.exists()) {
+            copyApkToDownloadFolder(apkFile);
+            Log.e("InstallAPK", "APK file exists");
+            Log.e("InstallAPK", "APK file name: " + apkFile.getName());
+
+
+            Log.e("InstallAPK", "APK file size (bytes): " + apkFile.length());
+            Log.e("InstallAPK", "APK file absolute path: " + apkFile.getAbsolutePath());
+
+
+            Log.e("InstallAPK", "APK file size (bytes): " + apkFile.length());
+            Log.e("InstallAPK", "APK package name: " + context.getPackageName());
+
+            Log.e("InstallAPK", "Attempting to install APK");
+            Uri apkUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", apkFile);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                context.startActivity(intent);
+                // Close the app's process
+                android.os.Process.killProcess(android.os.Process.myPid());
+
+            } catch (Exception e) {
+                Log.e("InstallAPK", "Error installing APK: " + e.getMessage());
+            }
+        }
     }
 
 
