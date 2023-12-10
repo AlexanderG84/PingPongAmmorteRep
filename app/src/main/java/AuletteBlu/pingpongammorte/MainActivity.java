@@ -1039,8 +1039,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
         uniqueID = getUniqueID();
 
-        // Ottieni il riferimento al TextView
-
+ 
         // Ottieni il riferimento al TextView
         TextView versionTextView = findViewById(R.id.app_version);
 
