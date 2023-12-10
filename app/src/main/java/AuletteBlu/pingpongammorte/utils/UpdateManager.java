@@ -66,9 +66,9 @@ public class UpdateManager {
                 if (response.isSuccessful()) {
                     GitHubRelease latestRelease = response.body();
                     if (latestRelease != null) {
-                        String latestVersion = latestRelease.getTagName();
+                        String latestVersion = latestRelease.getTagName().replaceAll("[^\\d.]+", "");
                         //PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-                        String currentVersion = packageInfo.versionName;
+                        String currentVersion = packageInfo.versionName.replaceAll("[^\\d.]+", "");
 
                         if (compareVersions(latestVersion, currentVersion) > 0) {
                             // Se è disponibile un aggiornamento, scaricalo e installalo
