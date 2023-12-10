@@ -21,6 +21,15 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
 
+    - name: Check Keystore File
+      run: |
+        if [ -f app/keystore/keystore_pp.jks ]; then
+          echo "Keystore file found."
+        else
+          echo "Keystore file not found."
+          exit 1
+        fi
+    
     - name: Copy Keystore to Project
       run: cp app/keystore/keystore_pp.jks app/keystore.jks
 
