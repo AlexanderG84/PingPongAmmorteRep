@@ -90,15 +90,29 @@ public class UpdateManager {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
-                        // Scrivi il file APK nel file system esterno
-                        File apkFile = writeResponseBodyToDisk(response.body());
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+
+                                    // Scrivi il file APK nel file system esterno
+                                    File apkFile = writeResponseBodyToDisk(response.body());
 // Dopo aver scaricato l'APK, chiamalo con il percorso del file scaricato
-                        if(apkFile!=null)
-                        moveApkToPublicDirectory(apkFile);
+                                    if(apkFile!=null)
+                                        installApk(apkFile);
+                                       // moveApkToPublicDirectory(apkFile);
+
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    // Gestisci eventuali eccezioni
+                                }
+                            }
+                        }).start();
+
 
                         // Avvia l'installazione
                     //    installApk(apkFile);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -152,12 +166,18 @@ public class UpdateManager {
     }
 
     private void installApk(File apkFile) {
+        Log.e("InstallAPK", "Attempting to install APK");
         Uri apkUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", apkFile);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        try {
+            context.startActivity(intent);
+        } catch (Exception e) {
+            Log.e("InstallAPK", "Error installing APK: " + e.getMessage());
+        }
+
     }
 
 

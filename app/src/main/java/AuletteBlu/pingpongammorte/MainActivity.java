@@ -1074,12 +1074,26 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 .setGitHubUserAndRepo("AlexanderG84", "PingPongAmmorteRep")
                 .start();*/
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
                 try {
-                    UpdateManager updateManager = new UpdateManager(getApplicationContext());
-                    updateManager.checkForUpdates();
-                } catch (Exception e) {
 
+                    try {
+                        UpdateManager updateManager = new UpdateManager(getApplicationContext());
+                        updateManager.checkForUpdates();
+                    } catch (Exception e) {
+
+                    }
+                    // Fai qualcosa con il file, ad esempio mostra una notifica all'utente
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // Gestisci eventuali eccezioni
                 }
+            }
+        }).start();
+
+
 
 
 
