@@ -3,7 +3,7 @@ name: Android CI/CD
 on:
   push:
     branches:
-      - Release # Il flusso di lavoro sarà attivato solo quando fai push su un branch chiamato "Release"
+      - Release
 
 jobs:
   build:
@@ -20,6 +20,9 @@ jobs:
 
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
+
+    - name: Copy Keystore to Project
+      run: cp app/keystore/keystore_pp.jks app/keystore.jks
 
     - name: Build Debug APK
       run: ./gradlew assembleDebug
@@ -43,9 +46,13 @@ jobs:
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
+        KEYSTORE_PATH: app/keystore.jks
+        KEYSTORE_PASSWORD: 'pingpong'
+        KEY_ALIAS: 'key_pp'
+        KEY_PASSWORD: 'pingpong'
       with:
-        tag_name: v${{ steps.get_version_name.outputs.version_name }} # Utilizza il versionName come nome del tag
-        release_name: Release v${{ steps.get_version_name.outputs.version_name }} # Utilizza il versionName come nome del rilascio
+        tag_name: v${{ steps.get_version_name.outputs.version_name }}
+        release_name: Release v${{ steps.get_version_name.outputs.version_name }}
         draft: false
         prerelease: false
 
