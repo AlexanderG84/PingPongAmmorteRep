@@ -1047,7 +1047,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
     //    String versionName = BuildConfig.VERSION_NAME;
 
 
-        
+
 
 
             try {
@@ -1060,7 +1060,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         try {
 
             String versionName = packageInfo.versionName;
-            versionTextView.setText("Versione: " + versionName);
+            versionTextView.setText("Versione_: " + versionName);
             // Usa il versionName come necessario
         } catch (Exception e) {
             e.printStackTrace();
