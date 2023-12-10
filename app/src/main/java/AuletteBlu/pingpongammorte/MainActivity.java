@@ -1,5 +1,12 @@
 package AuletteBlu.pingpongammorte;
 
+
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+
+
+
 import android.Manifest;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -42,13 +49,18 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 
+import com.github.javiersantos.appupdater.AppUpdater;
+
+import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -64,9 +76,15 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.Month;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +92,12 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import AuletteBlu.pingpongammorte.utils.UpdateManager;
+
 public class MainActivity extends AppCompatActivity implements DriveInteraction.FirebaseUpdateListener {
+
+  static public  PackageInfo packageInfo=null;
+
 
     private static final String PREFS_NAME = "MyAppPrefs";
     private static final String UNIQUE_ID_KEY = "unique_id";
@@ -1016,6 +1039,50 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
         uniqueID = getUniqueID();
 
+
+
+        // Ottieni il riferimento al TextView
+        TextView versionTextView = findViewById(R.id.app_version);
+
+// Ottieni la versione dell'app dalla configurazione del pacchetto
+    //    String versionName = BuildConfig.VERSION_NAME;
+
+// Imposta il testo del TextView con la versione dell'app
+
+
+
+            try {
+                packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            } catch (PackageManager.NameNotFoundException e) {
+
+            }
+
+
+        try {
+
+            String versionName = packageInfo.versionName;
+            versionTextView.setText("Versione: " + versionName);
+            // Usa il versionName come necessario
+        } catch (Exception e) {
+            e.printStackTrace();
+            // Gestisci l'eccezione
+        }
+
+
+/*
+        AppUpdater appUpdater = new AppUpdater(this);
+        appUpdater.setUpdateFrom(UpdateFrom.GITHUB)
+                .setGitHubUserAndRepo("AlexanderG84", "PingPongAmmorteRep")
+                .start();*/
+
+                try {
+                    UpdateManager updateManager = new UpdateManager(getApplicationContext());
+                    updateManager.checkForUpdates();
+                } catch (Exception e) {
+
+                }
+
+
         // FirebaseApp.initializeApp(getApplicationContext());
 
         driveInteraction.initializeFirebase();
@@ -1053,6 +1120,38 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
     }
 
+    public void downloadApk() throws IOException {
+        // Download the APK file
+        String apkUrl = "https://example.com/your-updated-app.apk"; // Replace with your APK URL
+        URL url = new URL(apkUrl);
+        HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setRequestMethod("GET");
+        urlConnection.connect();
+
+        if (urlConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+            InputStream inputStream = urlConnection.getInputStream();
+
+            // Save the downloaded APK to a file
+            File apkFile = new File(getExternalFilesDir(null), "update.apk");
+            FileOutputStream outputStream = new FileOutputStream(apkFile);
+            byte[] buffer = new byte[1024];
+            int len;
+            while ((len = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, len);
+            }
+            outputStream.close();
+
+            // Install the downloaded APK using PackageInstaller
+            Uri apkUri = FileProvider.getUriForFile(this, getPackageName() + ".fileprovider", apkFile);
+            Intent installIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+            installIntent.setData(apkUri);
+            installIntent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            startActivity(installIntent);
+        }
+
+    }
+
+
     public void foundImgSfondo(){
         try {
             List<LocalDate> matchDates = new ArrayList<>();
@@ -1070,7 +1169,10 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 // 2. Trova la data più recente che non sia la data odierna
             LocalDate today = null;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                today = LocalDate.now();
+                LocalDateTime nowMinusThreeHours = LocalDateTime.now(ZoneId.systemDefault()).minusHours(3);
+                today = nowMinusThreeHours.toLocalDate();
+
+
             }
             LocalDate finalToday = today;
             LocalDate lastValidDate = null;
@@ -1148,8 +1250,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
     private int countWinsOnDate(Player player, LocalDate date) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             return (int) player.getMatches().stream()
-                    .filter(match -> match.getWinner().equals(player.getName()))
-                    .filter(match -> LocalDate.parse(match.getDate()).equals(date))
+                    .filter(match ->match.type.equals(matchType)&& match.getWinner().equals(player.getName()))
+                    .filter(match ->match.type.equals(matchType)&& LocalDate.parse(match.getDate()).equals(date))
                     .count();
         }
         else return 0;
@@ -1159,8 +1261,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
     private double countPercWinsOnDate(Player player, LocalDate date) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             long wins = player.getMatches().stream()
-                    .filter(match -> match.getWinner().equals(player.getName()))
-                    .filter(match -> LocalDate.parse(match.getDate()).equals(date))
+                    .filter(match ->match.type.equals(matchType)&& match.getWinner().equals(player.getName()))
+                    .filter(match ->match.type.equals(matchType)&&  LocalDate.parse(match.getDate()).equals(date))
                     .count();
             long played = player.getMatches().size();
 

@@ -1,5 +1,6 @@
 package AuletteBlu.pingpongammorte;
 
+import android.net.Uri;
 import android.util.Log;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -8,6 +9,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,9 +30,9 @@ public class DriveInteraction {
     public void initializeFirebase() {
         try {
 
-           // databaseRef = database.getReference();
+            // databaseRef = database.getReference();
 
-             databaseRef = FirebaseDatabase.getInstance().getReference();
+            databaseRef = FirebaseDatabase.getInstance().getReference();
 
             Log.e("firebase", "gg0");
         }
@@ -185,26 +187,30 @@ public class DriveInteraction {
     }
 
     public void recordAccess(String userId, String actionType) {
-        if (!firstInteraction || userId.equals("1442eea5-2d3c-42f8-a693-fd98f33d8549"))
-        return;
+        if (!firstInteraction /*|| userId.equals("1442eea5-2d3c-42f8-a693-fd98f33d8549")*/)
+            return;
         try {
             firstInteraction = false;
 
-           // DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(formattedDate); // Usa il timestamp formattato come chiave diretta
+            // DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(formattedDate); // Usa il timestamp formattato come chiave diretta
             SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
             String formattedDate = formatter.format(new Date());
 
-            DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(formattedDate); // Usa il timestamp formattato come chiave diretta
+            long negTimestamp = Long.MAX_VALUE - System.currentTimeMillis();
+
+
+            String key = negTimestamp + "___" + formattedDate;
+            DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(key);
 
 
             Map<String, Object> logData = new HashMap<>();
-            logData.put("timestamp", formattedDate); // Usa la data formattata
+            logData.put("data", formattedDate); // Usa la data formattata
 
             userLogRef.setValue(logData)
                     .addOnSuccessListener(aVoid -> Log.e("Firebase Access Log", "Accesso registrato con successo"))
                     .addOnFailureListener(e -> Log.e("Firebase Access Log", "Errore durante la registrazione dell'accesso", e));
 
-             // Imposta la variabile su false dopo il primo accesso
+            // Imposta la variabile su false dopo il primo accesso
 
             firstInteraction=false;
         } catch (Exception e) {
@@ -212,5 +218,30 @@ public class DriveInteraction {
         }
     }
 
+/*
+
+
+    public void uploadApk(){
+// Initialize Firebase Storage
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference();
+
+// Create a reference to the APK file in Firebase Storage
+        StorageReference apkRef = storageRef.child("updates/your-updated-app.apk");
+
+// Upload the APK file
+        File apkFile = new File("path/to/your-local-apk.apk");
+        Uri apkUri = Uri.fromFile(apkFile);
+        UploadTask uploadTask = apkRef.putFile(apkUri);
+
+        uploadTask.addOnSuccessListener(taskSnapshot -> {
+            // APK uploaded successfully
+        }).addOnFailureListener(exception -> {
+            // Handle the error
+        });
+
+
+    }
+*/
 
 }

@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 public class BorderedTextView extends androidx.appcompat.widget.AppCompatTextView {
 
-    private int borderColor = Color.BLACK; // Colore del bordo
+    private int borderColor = Color.RED; // Colore del bordo
     private float borderWidth = 4; // Larghezza del bordo
 
     public BorderedTextView(Context context) {
