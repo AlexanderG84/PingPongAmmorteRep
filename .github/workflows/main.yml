@@ -2,8 +2,8 @@ name: Android CI/CD
 
 on:
   push:
-    tags:
-      - '*'
+    branches:
+      - Release # Il flusso di lavoro sarà attivato solo quando fai push su un branch chiamato "Release"
 
 jobs:
   build:
@@ -44,12 +44,10 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.sha }}
-        release_name: Release ${{ github.sha }}
+        tag_name: v${{ steps.get_version_name.outputs.version_name }} # Utilizza il versionName come nome del tag
+        release_name: Release v${{ steps.get_version_name.outputs.version_name }} # Utilizza il versionName come nome del rilascio
         draft: false
         prerelease: false
-        body: |
-          Version Name: ${{ steps.get_version_name.outputs.version_name }}
 
     - name: Upload APK to Release
       uses: actions/upload-release-asset@v1
