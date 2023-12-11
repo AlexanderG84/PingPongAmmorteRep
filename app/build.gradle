@@ -13,8 +13,8 @@ android {
         applicationId "AuletteBlu.pingpongammorte"
         minSdk 24
         targetSdk 33
-        versionCode 7
-        versionName "1.0.7"
+        versionCode 3
+        versionName "1.0.3"
 
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

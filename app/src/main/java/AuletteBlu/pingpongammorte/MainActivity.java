@@ -1081,7 +1081,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
                     try {
                         UpdateManager updateManager = new UpdateManager(getApplicationContext());
-                        updateManager.checkForUpdates();
+                        //updateManager.checkForUpdates();
                     } catch (Exception e) {
 
                     }
