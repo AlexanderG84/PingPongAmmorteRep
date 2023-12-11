@@ -5,19 +5,20 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 
-
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.telephony.TelephonyManager;
+import android.content.pm.PackageManager;
 
 import android.Manifest;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
-import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 
 
 import static AuletteBlu.pingpongammorte.LeaderboardActivity.deepCloneList;
@@ -29,7 +30,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.provider.DocumentsContract;
@@ -38,7 +38,6 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.animation.BounceInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -58,9 +57,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
-import com.github.javiersantos.appupdater.AppUpdater;
-
-import com.github.javiersantos.appupdater.enums.UpdateFrom;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -77,8 +73,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -92,6 +86,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
+import AuletteBlu.pingpongammorte.utils.DriveInteraction;
 import AuletteBlu.pingpongammorte.utils.UpdateManager;
 
 public class MainActivity extends AppCompatActivity implements DriveInteraction.FirebaseUpdateListener {
@@ -119,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
     static String playerName="";
 
-    public static ArrayList<Player> players; // Popolato con i dati
+    public static ArrayList<Player> players = new ArrayList<>(); // Popolato con i dati
     private List<Player> mockPlayers; // Popolato con i dati
 
     @Override
@@ -1037,6 +1032,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        context=getApplicationContext();
+
         uniqueID = getUniqueID();
 
 
@@ -1081,7 +1078,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
                     try {
                         UpdateManager updateManager = new UpdateManager(getApplicationContext());
-                        //updateManager.checkForUpdates();
+                        updateManager.checkForUpdates();
                     } catch (Exception e) {
 
                     }
@@ -1106,7 +1103,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
         Log.d("DriveInte FirebaseInit", "Firebase inizializzato con successo");
         // Supponiamo che tu abbia una lista di giocatori predefinita
-        players = new ArrayList<>(Arrays.asList(
+       /* players = new ArrayList<>(Arrays.asList(
                 new Player("Talex", 0),
                 new Player("Pompolus", 0),
                 new Player("Strino", 0),
@@ -1119,8 +1116,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 new Player("Daniele - Pompolus", 0),
                 new Player("Strino - Talex", 0)
         ));
+*/
 
-        context=getApplicationContext();
         loadScoresFromPreferences(new LoadScoresCallback() {
             @Override
             public void onScoresLoaded(List<Player> players) {
@@ -1466,8 +1463,36 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         }
     }
 
-
     private String getUniqueID() {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        String id = prefs.getString(UNIQUE_ID_KEY, null);
+
+        if (id == null) {
+            // Ottieni l'IMEI del dispositivo
+            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (telephonyManager != null) {
+                if (context.checkSelfPermission(Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        id = telephonyManager.getImei();
+                    }
+                }
+            }
+
+            if (id == null) {
+                // Se l'IMEI non è disponibile, genera un nuovo ID univoco basato su altre informazioni
+                id = getUniqueID2();
+            }
+
+            // Salva l'ID univoco nelle SharedPreferences
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.putString(UNIQUE_ID_KEY, id);
+            editor.apply();
+        }
+
+        return id;
+    }
+
+    private String getUniqueID2() {
         SharedPreferences prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
         String id = prefs.getString(UNIQUE_ID_KEY, null);
 

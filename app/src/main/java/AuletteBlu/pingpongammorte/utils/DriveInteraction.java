@@ -1,4 +1,4 @@
-package AuletteBlu.pingpongammorte;
+package AuletteBlu.pingpongammorte.utils;
 
 import android.net.Uri;
 import android.util.Log;
@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
+
+import AuletteBlu.pingpongammorte.MainActivity;
 
 public class DriveInteraction {
 
