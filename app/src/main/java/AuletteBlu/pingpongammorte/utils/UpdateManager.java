@@ -2,11 +2,13 @@ package AuletteBlu.pingpongammorte.utils;
 
 import static AuletteBlu.pingpongammorte.MainActivity.packageInfo;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 import androidx.core.content.FileProvider;
@@ -39,6 +41,8 @@ public class UpdateManager {
     private static final String GITHUB_OWNER = "AlexanderG84";
     private static final String GITHUB_REPO = "PingPongAmmorteRep";
 
+    public static final String GITHUB_BRANCH = "Release";
+
     private Context context;
     private Retrofit retrofit;
     private GitHubApiService apiService;
@@ -55,16 +59,16 @@ public class UpdateManager {
     }
 
     public void checkForUpdates() {
-        Call<GitHubRelease> call = apiService.getLatestRelease(GITHUB_OWNER, GITHUB_REPO);
+        Call<GitHubRelease> call = apiService.getLatestRelease(GITHUB_OWNER, GITHUB_REPO,GITHUB_BRANCH);
         call.enqueue(new Callback<GitHubRelease>() {
             @Override
             public void onResponse(Call<GitHubRelease> call, Response<GitHubRelease> response) {
                 if (response.isSuccessful()) {
                     GitHubRelease latestRelease = response.body();
                     if (latestRelease != null) {
-                        String latestVersion = latestRelease.getTagName();
+                        String latestVersion = latestRelease.getTagName().replaceAll("[^\\d.]+", "");
                         //PackageInfo packageInfo = getPackageManager().getPackageInfo(getPackageName(), 0);
-                        String currentVersion = packageInfo.versionName;
+                        String currentVersion = packageInfo.versionName.replaceAll("[^\\d.]+", "");
 
                         if (compareVersions(latestVersion, currentVersion) > 0) {
                             // Se è disponibile un aggiornamento, scaricalo e installalo
@@ -88,15 +92,29 @@ public class UpdateManager {
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
                     try {
-                        // Scrivi il file APK nel file system esterno
-                        File apkFile = writeResponseBodyToDisk(response.body());
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+
+                                    // Scrivi il file APK nel file system esterno
+                                    File apkFile = writeResponseBodyToDisk(response.body());
 // Dopo aver scaricato l'APK, chiamalo con il percorso del file scaricato
-                        if(apkFile!=null)
-                        moveApkToPublicDirectory(apkFile);
+                                    if(apkFile!=null)
+                                        installApk(apkFile);
+                                       // moveApkToPublicDirectory(apkFile);
+
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    // Gestisci eventuali eccezioni
+                                }
+                            }
+                        }).start();
+
 
                         // Avvia l'installazione
                     //    installApk(apkFile);
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
@@ -149,13 +167,91 @@ public class UpdateManager {
         }
     }
 
+    public void copyApkToDownloadFolder(File sourceFile) {
+        try {
+            File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File destinationFile = new File(downloadFolder, sourceFile.getName());
+
+            // Create ContentValues for the new file
+            ContentValues values = new ContentValues();
+            values.put(MediaStore.Downloads.DISPLAY_NAME, destinationFile.getName());
+            values.put(MediaStore.Downloads.MIME_TYPE, "application/vnd.android.package-archive");
+            values.put(MediaStore.Downloads.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS);
+
+            // Insert the new file into the MediaStore
+            Uri uri = context.getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values);
+
+            // Write the APK file's contents to the output stream
+            try (OutputStream os = context.getContentResolver().openOutputStream(uri)) {
+                if (os != null) {
+                    FileInputStream inputStream = new FileInputStream(sourceFile);
+                    byte[] buffer = new byte[1024];
+                    int length;
+                    while ((length = inputStream.read(buffer)) > 0) {
+                        os.write(buffer, 0, length);
+                    }
+                    inputStream.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    public void _copyApkToDownloadFolder(File sourceFile) {
+        try {
+            File downloadFolder = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            File destinationFile = new File(downloadFolder, sourceFile.getName());
+
+            FileInputStream inputStream = new FileInputStream(sourceFile);
+            FileOutputStream outputStream = new FileOutputStream(destinationFile);
+
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+
+            inputStream.close();
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void installApk(File apkFile) {
-        Uri apkUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", apkFile);
-        Intent intent = new Intent(Intent.ACTION_VIEW);
-        intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
-        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        context.startActivity(intent);
+        if (apkFile.exists()) {
+            copyApkToDownloadFolder(apkFile);
+            Log.e("InstallAPK", "APK file exists");
+            Log.e("InstallAPK", "APK file name: " + apkFile.getName());
+
+
+            Log.e("InstallAPK", "APK file size (bytes): " + apkFile.length());
+            Log.e("InstallAPK", "APK file absolute path: " + apkFile.getAbsolutePath());
+
+
+            Log.e("InstallAPK", "APK file size (bytes): " + apkFile.length());
+            Log.e("InstallAPK", "APK package name: " + context.getPackageName());
+
+            Log.e("InstallAPK", "Attempting to install APK");
+            Uri apkUri = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".provider", apkFile);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            try {
+                context.startActivity(intent);
+                // Close the app's process
+                android.os.Process.killProcess(android.os.Process.myPid());
+
+            } catch (Exception e) {
+                Log.e("InstallAPK", "Error installing APK: " + e.getMessage());
+            }
+        }
     }
 
 

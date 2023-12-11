@@ -1040,14 +1040,13 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         uniqueID = getUniqueID();
 
 
-
         // Ottieni il riferimento al TextView
         TextView versionTextView = findViewById(R.id.app_version);
 
 // Ottieni la versione dell'app dalla configurazione del pacchetto
     //    String versionName = BuildConfig.VERSION_NAME;
 
-// Imposta il testo del TextView con la versione dell'app
+
 
 
 
@@ -1061,7 +1060,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         try {
 
             String versionName = packageInfo.versionName;
-            versionTextView.setText("Versione: " + versionName);
+            versionTextView.setText("Versione_: " + versionName);
             // Usa il versionName come necessario
         } catch (Exception e) {
             e.printStackTrace();
@@ -1075,12 +1074,28 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 .setGitHubUserAndRepo("AlexanderG84", "PingPongAmmorteRep")
                 .start();*/
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
                 try {
-                    UpdateManager updateManager = new UpdateManager(getApplicationContext());
-                    updateManager.checkForUpdates();
-                } catch (Exception e) {
 
+                    try {
+                        UpdateManager updateManager = new UpdateManager(getApplicationContext());
+                        updateManager.checkForUpdates();
+                    } catch (Exception e) {
+
+                    }
+                    // Fai qualcosa con il file, ad esempio mostra una notifica all'utente
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    // Gestisci eventuali eccezioni
                 }
+            }
+        }).start();
+
+
+
+
 
 
         // FirebaseApp.initializeApp(getApplicationContext());

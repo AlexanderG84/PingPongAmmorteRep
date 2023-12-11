@@ -3,25 +3,74 @@ name: Android CI/CD
 on:
   push:
     branches:
-      - release
+      - Release
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v1
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
       with:
-        java-version: 11
+        distribution: 'temurin'
+        java-version: '17'
 
-    - name: Build Release APK
-      run: ./gradlew assembleRelease
+    - name: Grant execute permission for gradlew
+      run: chmod +x ./gradlew
 
-    - name: Upload APK
+    - name: Check Keystore File
+      run: |
+        if [ -f app/keystore/keystore_pp.jks ]; then
+          echo "Keystore file found."
+        else
+          echo "Keystore file not found."
+          exit 1
+        fi
+    
+    - name: Copy Keystore to Project
+      run: cp app/keystore/keystore_pp.jks app/keystore.jks
+
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug
+
+    - name: Upload Debug APK
       uses: actions/upload-artifact@v2
       with:
-        name: app-release.apk
-        path: app/build/outputs/apk/release/app-release.apk
+        name: app-debug.apk
+        path: app/build/outputs/apk/debug/app-debug.apk
+
+    - name: Get Version Name from build.gradle
+      id: get_version_name
+      run: |
+        versionName=$(grep -oP 'versionName "[0-9.]*"' app/build.gradle | grep -oP '"[0-9.]+"')
+        echo "Version Name: $versionName"
+        echo "::set-output name=version_name::$versionName"
+      shell: bash
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
+        KEYSTORE_PATH: app/keystore.jks
+        KEYSTORE_PASSWORD: 'pingpong'
+        KEY_ALIAS: 'key_pp'
+        KEY_PASSWORD: 'pingpong'
+      with:
+        tag_name: v${{ steps.get_version_name.outputs.version_name }}
+        release_name: Release v${{ steps.get_version_name.outputs.version_name }}
+        draft: false
+        prerelease: false
+
+    - name: Upload APK to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.ACTIONS_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./app/build/outputs/apk/debug/app-debug.apk
+        asset_name: app-debug.apk
+        asset_content_type: application/vnd.android.package-archive
