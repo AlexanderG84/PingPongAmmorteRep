@@ -83,7 +83,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import AuletteBlu.pingpongammorte.utils.DriveInteraction;
@@ -95,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
 
     private static final String PREFS_NAME = "MyAppPrefs";
-    private static final String UNIQUE_ID_KEY = "unique_id";
+    private static final String UNIQUE_ID_KEY = "unique_andr_id";
     public static String uniqueID;
 
     LinearLayout layoutSpinner;
@@ -1489,7 +1491,23 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             editor.apply();
         }
 
-        return id;
+        Map<String, String> idNameMap; // Una mappa per associare id a nomi utente
+        idNameMap = new HashMap<>();
+        // Aggiungi le coppie id-nome iniziali alla lista
+        idNameMap.put("60754571f3d05762", "Talex");
+        idNameMap.put("6059273b1f494388", "Daniele");
+        idNameMap.put("60754571f3d05762", "Pompolus");
+
+        if (idNameMap.containsKey(id)) {
+            String nome = idNameMap.get(id);
+            // Restituisci la stringa composta da nome + "_" + id
+            return nome ;
+        } else {
+            // Se l'id non è presente nella lista, restituisci solo l'id
+            return id;
+        }
+
+        //return id;
     }
 
     private String getUniqueID2() {
@@ -1498,7 +1516,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
         if (id == null) {
             // Genera un nuovo ID univoco
-            id = UUID.randomUUID().toString();
+            //id = UUID.randomUUID().toString();
+            id = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
             SharedPreferences.Editor editor = prefs.edit();
             editor.putString(UNIQUE_ID_KEY, id);
             editor.apply();
