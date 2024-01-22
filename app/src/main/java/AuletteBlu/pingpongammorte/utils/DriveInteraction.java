@@ -4,6 +4,9 @@ import static AuletteBlu.pingpongammorte.MainActivity.packageInfo;
 
 import android.net.Uri;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -84,7 +87,7 @@ public class DriveInteraction {
         }).start();
     }
 
-    public  void readFirebaseData() {
+    /*public  void readFirebaseData() {
         databaseRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -99,7 +102,7 @@ public class DriveInteraction {
                 Log.e("Firebase", "Errore durante la lettura dei dati", databaseError.toException());
             }
         });
-    }
+    }*/
 
     public  void uploadText(String text) {
         Map<String, Object> updates = new HashMap<>();
@@ -203,6 +206,7 @@ public class DriveInteraction {
             long negTimestamp = Long.MAX_VALUE - System.currentTimeMillis();
 
 
+            userId= getIdNameMapFromFirebaseSync(userId);
             String key = negTimestamp + "___" + formattedDate;
             DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(key);
 
@@ -222,6 +226,107 @@ public class DriveInteraction {
 
         }
     }
+
+    public Map<String, String> _getIdNameMapFromFirebaseSync() {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Map<String, String>> idNameMapReference = new AtomicReference<>();
+
+        DatabaseReference usersRef = databaseRef.child("users");
+
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                Map<String, String> idNameMap = new HashMap<>();
+
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    String userId = userSnapshot.getKey();
+                    String userName = userSnapshot.child("name").getValue(String.class);
+
+                    if (userName != null) {
+                        idNameMap.put(userId, userName);
+                    }
+                }
+
+                idNameMapReference.set(idNameMap);
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Gestisci eventuali errori di accesso al database
+                latch.countDown(); // Assicurati che il latch venga comunque contato
+            }
+        });
+
+        try {
+            latch.await(); // Attendere finché i dati non sono stati recuperati da Firebase
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, String> idNameMap = idNameMapReference.get();
+        if (idNameMap == null) {
+            idNameMap = new HashMap<>(); // Inizializza la mappa vuota in caso di errore
+        }
+
+        return idNameMap;
+    }
+
+
+    public String getIdNameMapFromFirebaseSync(String id) {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final AtomicReference<Map<String, String>> idNameMapReference = new AtomicReference<>();
+
+        DatabaseReference usersRef = databaseRef.child("Users");
+
+        usersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Map<String, String> idNameMap = new HashMap<>();
+
+                for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                    String userId = userSnapshot.getKey();
+                    String userName = userSnapshot.getValue(String.class);
+
+                    if (userId != null && userName != null) {
+                        idNameMap.put(userId, userName);
+                    }
+                }
+
+                idNameMapReference.set(idNameMap);
+                latch.countDown();
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                // Gestisci eventuali errori di accesso al database
+                latch.countDown(); // Assicurati che il latch venga comunque contato
+            }
+        });
+
+        try {
+            latch.await(); // Attendere finché i dati non sono stati recuperati da Firebase
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, String> idNameMap = idNameMapReference.get();
+        if (idNameMap == null) {
+            idNameMap = new HashMap<>(); // Inizializza la mappa vuota in caso di errore
+        }
+
+        if (idNameMap.containsKey(id)) {
+            String nome = idNameMap.get(id);
+            // Restituisci la stringa composta da nome + "_" + id
+            return nome ;
+        } else {
+            // Se l'id non è presente nella lista, restituisci solo l'id
+            return id;
+        }
+
+
+    }
+
 
 /*
 

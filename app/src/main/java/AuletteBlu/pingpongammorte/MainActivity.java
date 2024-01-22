@@ -1036,7 +1036,6 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
         context=getApplicationContext();
 
-        uniqueID = getUniqueID();
 
 
         // Ottieni il riferimento al TextView
@@ -1119,6 +1118,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 new Player("Strino - Talex", 0)
         ));
 */
+        uniqueID = getUniqueID();
 
         loadScoresFromPreferences(new LoadScoresCallback() {
             @Override
@@ -1492,12 +1492,15 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         }
 
         Map<String, String> idNameMap; // Una mappa per associare id a nomi utente
+
         idNameMap = new HashMap<>();
+
+       // idNameMap= driveInteraction.getIdNameMapFromFirebaseSync();
         // Aggiungi le coppie id-nome iniziali alla lista
-        idNameMap.put("60754571f3d05762", "Talex");
+      /*  idNameMap.put("0bd16ea7a2e4f3ab", "Talex");
         idNameMap.put("6059273b1f494388", "Daniele");
         idNameMap.put("60754571f3d05762", "Pompolus");
-
+*/
         if (idNameMap.containsKey(id)) {
             String nome = idNameMap.get(id);
             // Restituisci la stringa composta da nome + "_" + id
