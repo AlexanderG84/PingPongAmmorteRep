@@ -1,5 +1,7 @@
 package AuletteBlu.pingpongammorte.utils;
 
+import static AuletteBlu.pingpongammorte.MainActivity.packageInfo;
+
 import android.net.Uri;
 import android.util.Log;
 import com.google.firebase.database.DataSnapshot;
@@ -207,7 +209,7 @@ public class DriveInteraction {
 
             Map<String, Object> logData = new HashMap<>();
             logData.put("data", formattedDate); // Usa la data formattata
-
+            logData.put("version", packageInfo.versionName);
             userLogRef.setValue(logData)
                     .addOnSuccessListener(aVoid -> Log.e("Firebase Access Log", "Accesso registrato con successo"))
                     .addOnFailureListener(e -> Log.e("Firebase Access Log", "Errore durante la registrazione dell'accesso", e));
