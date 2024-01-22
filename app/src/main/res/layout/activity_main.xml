@@ -1,38 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/background_image"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop" />
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
-<LinearLayout
-    android:id="@+id/layout_spinner"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#FF0000"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layout_spinner"
+        android:background="#FF0000"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="16dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-    <LinearLayout
-
-
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp">
-
+        <!-- Sezione per il primo giocatore -->
         <Spinner
             android:id="@+id/player1_spinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
-            android:minHeight="50dp" />
+            android:minHeight="50dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/player1_score"/>
 
         <EditText
             android:id="@+id/player1_score"
@@ -40,22 +43,21 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:inputType="number"
-            android:hint="Punteggio" />
+            android:hint="Punteggio"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/player1_spinner"/>
 
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp">
-
+        <!-- Sezione per il secondo giocatore -->
         <Spinner
             android:id="@+id/player2_spinner"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="5"
-            android:minHeight="50dp" />
+            android:minHeight="50dp"
+            app:layout_constraintTop_toBottomOf="@+id/player1_spinner"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/player2_score"/>
 
         <EditText
             android:id="@+id/player2_score"
@@ -63,29 +65,27 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:inputType="number"
-
-            android:hint="Punteggio" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp"
-        >
+            android:hint="Punteggio"
+            app:layout_constraintTop_toBottomOf="@+id/player1_score"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/player2_spinner"/>
 
 
+        <!-- Sezioni per i giocatori, Spinner e EditText qui -->
 
-            <GridLayout
-                android:id="@+id/sports"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:alignmentMode="alignMargins"
-                android:columnCount="2"
-            android:rowCount="2"
-            android:columnOrderPreserved="false">
+        <!-- GridLayout per la selezione dello sport -->
+        <GridLayout
+            android:id="@+id/sports"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:alignmentMode="alignMargins"
+            android:columnCount="2"
+            android:rowCount="3"
+            app:layout_constraintTop_toBottomOf="@+id/player2_spinner"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
+            <!-- RadioButton per i vari sport -->
             <RadioButton
                 android:id="@+id/radio1"
                 android:layout_width="0dp"
@@ -93,7 +93,7 @@
                 android:layout_gravity="fill"
                 android:layout_columnWeight="1"
                 android:checked="true"
-                android:text="PingPong 1v1" />
+                android:text="PingPong 1v1"/>
 
             <RadioButton
                 android:id="@+id/radio2"
@@ -101,9 +101,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="fill"
                 android:layout_columnWeight="1"
-                android:text="PingPong 2v2" />
-
-            <!-- Aggiungi gli altri RadioButton qui -->
+                android:text="PingPong 2v2"/>
 
             <RadioButton
                 android:id="@+id/radio3"
@@ -111,150 +109,120 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="fill"
                 android:layout_columnWeight="1"
-                android:text="Biliardino 1V1" />
+                android:text="Biliardino 1V1"/>
 
-            <!-- ... -->
+            <RadioButton
+                android:id="@+id/radio4"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:layout_columnWeight="1"
+                android:text="Biliardino 2V2"/>
 
-                <RadioButton
-                    android:id="@+id/radio4"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="fill"
-                    android:layout_columnWeight="1"
-                    android:text="Biliardino 2V2" />
-
-
-                <RadioButton
+            <RadioButton
                 android:id="@+id/radio5"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="fill"
                 android:layout_columnWeight="1"
-                android:text="Biliardo 1V1" />
+                android:text="Biliardo 1V1"/>
 
-                <RadioButton
-                    android:id="@+id/radio6"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="fill"
-                    android:layout_columnWeight="1"
-                    android:text="Biliardo 2V2" />
-
+            <RadioButton
+                android:id="@+id/radio6"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="fill"
+                android:layout_columnWeight="1"
+                android:text="Biliardo 2V2"/>
         </GridLayout>
 
+        <!-- Bottoni per le varie azioni -->
+        <Button
+            android:id="@+id/button_submit"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Salva la Partita"
+            app:layout_constraintTop_toBottomOf="@+id/sports"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-</LinearLayout>
+        <Button
+            android:id="@+id/button_view_scores"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Vedi Classifica"
+            android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@+id/button_submit"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
-        android:id="@+id/button_submit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:textColor="#008000"
-        android:textStyle="bold"
-        android:fontFamily="Comic Sans"
-        android:text="Salva la Partita" />
+        <Button
+            android:id="@+id/button_view_history"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Storico Sfide"
+            app:layout_constraintTop_toBottomOf="@+id/button_view_scores"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- Linea di separazione -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="#BDBDBD"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="0dp"/>
+        <Button
+            android:id="@+id/button_view_albo"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="ALBO D'ORO"
+            app:layout_constraintTop_toBottomOf="@+id/button_view_history"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
-        android:id="@+id/button_view_scores"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:textColor="#FF0000"
-        android:textStyle="bold"
-        android:fontFamily="Cursive"
-        android:text="Vedi Classifica" />
+        <Button
+            android:id="@+id/clearPlayer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Salva Backup"
+            android:layout_marginTop="32dp"
+        app:layout_constraintTop_toBottomOf="@+id/button_view_albo"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
-        android:id="@+id/button_view_history"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#FF0000"
-        android:textStyle="bold"
-        android:layout_marginTop="5dp"
-        android:fontFamily="Monospace"
-        android:text="Storico Sfide" />
+        <Button
+            android:id="@+id/MockPlayer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Carica Backup"
+            app:layout_constraintTop_toBottomOf="@+id/clearPlayer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-    <Button
-        android:id="@+id/button_view_albo"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#FFD700"
-        android:textStyle="bold"
-        android:fontFamily="Serif"
-        android:layout_marginTop="20dp"
-        android:text="ALBO D'ORO" />
-
-    <Button
-        android:id="@+id/clearPlayer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:textStyle="bold"
-        android:fontFamily="Sans-serif Condensed"
-        android:text="Salva Backup" />
-
-    <Button
-        android:id="@+id/MockPlayer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:fontFamily="Lobster"
-        android:text="Carica Backup" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="6dp"
-        android:gravity="center_vertical">
-
+        <!-- Sezione per aggiungere un giocatore -->
         <EditText
             android:id="@+id/playerNameEditText"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:hint="Inserisci il nome del giocatore"
-            android:inputType="textPersonName" />
+            android:inputType="textPersonName"
+            app:layout_constraintTop_toBottomOf="@+id/MockPlayer"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/addPlayerButton" />
 
         <Button
             android:id="@+id/addPlayerButton"
             android:layout_width="wrap_content"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
             android:text="+"
-            android:onClick="onAddPlayerClicked" />
+            android:onClick="onAddPlayerClicked"
+            app:layout_constraintTop_toTopOf="@+id/playerNameEditText"
+            app:layout_constraintBottom_toBottomOf="@+id/playerNameEditText"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-
-
-    </LinearLayout>
-
-
-    <!-- ... altri elementi del layout ... -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-
-        android:gravity="center_vertical">
-
+        <!-- Version TextView -->
         <AuletteBlu.pingpongammorte.BorderedTextView
-        android:id="@+id/app_version"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#FFD700"
-        android:text="Version"
-        android:textSize="12sp"
-        android:gravity="center"
-        android:layout_gravity="center_horizontal"
-      />
-    </LinearLayout>
-</LinearLayout>
-</FrameLayout>
+            android:id="@+id/app_version"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Version"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

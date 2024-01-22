@@ -53,6 +53,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -100,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
     private static final String UNIQUE_ID_KEY = "unique_andr_id";
     public static String uniqueID;
 
-    LinearLayout layoutSpinner;
+    ConstraintLayout layoutSpinner;
     private static final int MY_PERMISSIONS_REQUEST_STORAGE = 1;
     private static final int MY_PERMISSIONS_REQUEST_MANAGE_STORAGE = 2;
 
@@ -1245,7 +1246,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             // Imposta l'immagine come sfondo nel thread UI
             int finalImageResourceId = imageResourceId;
             runOnUiThread(() -> {
-                LinearLayout mainLayout = findViewById(R.id.layout_spinner);
+                ConstraintLayout mainLayout = findViewById(R.id.layout_spinner);
                 Drawable originalDrawable = ContextCompat.getDrawable(MainActivity.this, finalImageResourceId);
 
                 // Crea una copia del Drawable originale
