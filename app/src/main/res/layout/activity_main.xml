@@ -39,7 +39,7 @@
 
         <EditText
             android:id="@+id/player1_score"
-            android:layout_width="0dp"
+            android:layout_width="55dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:inputType="number"
@@ -61,7 +61,7 @@
 
         <EditText
             android:id="@+id/player2_score"
-            android:layout_width="0dp"
+            android:layout_width="55dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:inputType="number"
@@ -140,9 +140,25 @@
         <Button
             android:id="@+id/button_submit"
             android:layout_width="0dp"
+
+            android:layout_marginTop="35dp"
             android:layout_height="wrap_content"
             android:text="Salva la Partita"
+            android:textColor="#008000"
+            android:textStyle="bold"
+            android:fontFamily="Comic Sans"
             app:layout_constraintTop_toBottomOf="@+id/sports"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
+        <View
+            android:id="@+id/sep"
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:background="#BDBDBD"
+            android:layout_marginTop="40dp"
+            android:layout_marginBottom="0dp"
+            app:layout_constraintTop_toBottomOf="@+id/button_submit"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -152,7 +168,10 @@
             android:layout_height="wrap_content"
             android:text="Vedi Classifica"
             android:layout_marginTop="16dp"
-        app:layout_constraintTop_toBottomOf="@+id/button_submit"
+            android:textColor="#FF0000"
+            android:textStyle="bold"
+            android:fontFamily="Cursive"
+        app:layout_constraintTop_toBottomOf="@+id/sep"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -161,6 +180,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Storico Sfide"
+            android:textColor="#FF0000"
+            android:textStyle="bold"
+
+            android:fontFamily="Monospace"
             app:layout_constraintTop_toBottomOf="@+id/button_view_scores"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -170,6 +193,9 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="ALBO D'ORO"
+            android:textColor="#FFD700"
+            android:textStyle="bold"
+            android:fontFamily="Serif"
             app:layout_constraintTop_toBottomOf="@+id/button_view_history"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
@@ -179,6 +205,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Salva Backup"
+            android:textStyle="bold"
+            android:fontFamily="Sans-serif Condensed"
             android:layout_marginTop="32dp"
         app:layout_constraintTop_toBottomOf="@+id/button_view_albo"
         app:layout_constraintStart_toStartOf="parent"
@@ -189,6 +217,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="Carica Backup"
+            android:textStyle="bold"
+            android:fontFamily="Lobster"
             app:layout_constraintTop_toBottomOf="@+id/clearPlayer"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
