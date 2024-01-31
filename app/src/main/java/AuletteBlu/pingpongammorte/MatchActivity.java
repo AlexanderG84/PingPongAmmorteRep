@@ -16,6 +16,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -47,9 +49,12 @@ public class MatchActivity extends AppCompatActivity {
     private Spinner player1Spinner, player2Spinner, dateSpinner;
     private RadioGroup sportRadioGroup;
     private ListView matchListView;
+    private CheckBox checkBoxPipponi;
 
     private List<Player> players;
     private ArrayAdapter<Match> matchAdapter;
+
+    boolean pipponi=false;
 
 
     private void saveScoresToPreferences() {
@@ -183,6 +188,20 @@ public class MatchActivity extends AppCompatActivity {
         dateSpinner = findViewById(R.id.date_spinner);
         //sportRadioGroup = findViewById(R.id.sport_radio_group);
         matchListView = findViewById(R.id.match_list_view);
+
+        checkBoxPipponi = findViewById(R.id.checkBoxPipponi);
+
+        checkBoxPipponi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                // Quando il CheckBox viene selezionato o deselezionato
+                // Imposta la variabile "pippone" a true se isChecked è true, altrimenti a false
+                pipponi = isChecked;
+                updateMatches();
+            }
+        });
+
+
         registerForContextMenu(matchListView);
 
         setupSpinners();
@@ -477,61 +496,85 @@ public class MatchActivity extends AppCompatActivity {
         updateDateSpinner(player1, player2, dateSpinner);
     }
 
+
+
     // Metodo ausiliario per verificare se un'ora è compresa tra mezzanotte e le 3
 
     private void displayMatches(List<Match> matches, Player player1, Player player2) {
-        // Ordina la lista dei match per data
-        Collections.sort(matches, new Comparator<Match>() {
-            @Override
-            public int compare(Match match1, Match match2) {
-                // Confronta le date dei due match per l'ordinamento
-                LocalDate date1 = LocalDate.parse(match1.getDate());
-                LocalDate date2 = LocalDate.parse(match2.getDate());
 
-                int result = date2.compareTo(date1); // Ordine decrescente per data (più recenti prima)
+        if(!pipponi) {
+            // Ordina la lista dei match per data
+            Collections.sort(matches, new Comparator<Match>() {
+                @Override
+                public int compare(Match match1, Match match2) {
+                    // Confronta le date dei due match per l'ordinamento
+                    LocalDate date1 = LocalDate.parse(match1.getDate());
+                    LocalDate date2 = LocalDate.parse(match2.getDate());
 
-                // Se le date sono uguali, confronta per ora
-                if (result == 0) {
-                    String hour1 = match1.getHour();
-                    String hour2 = match2.getHour();
+                    int result = date2.compareTo(date1); // Ordine decrescente per data (più recenti prima)
 
-                    // Gestisci il caso in cui una delle ore è una stringa vuota
-                    if (hour1.isEmpty() && hour2.isEmpty()) {
-                        return 0; // Le stringhe vuote sono considerate uguali
-                    } else if (hour1.isEmpty()) {
-                        return 1; // La stringa vuota viene considerata maggiore (posta alla fine)
-                    } else if (hour2.isEmpty()) {
-                        return -1; // La stringa vuota viene considerata maggiore (posta alla fine)
+                    // Se le date sono uguali, confronta per ora
+                    if (result == 0) {
+                        String hour1 = match1.getHour();
+                        String hour2 = match2.getHour();
+
+                        // Gestisci il caso in cui una delle ore è una stringa vuota
+                        if (hour1.isEmpty() && hour2.isEmpty()) {
+                            return 0; // Le stringhe vuote sono considerate uguali
+                        } else if (hour1.isEmpty()) {
+                            return 1; // La stringa vuota viene considerata maggiore (posta alla fine)
+                        } else if (hour2.isEmpty()) {
+                            return -1; // La stringa vuota viene considerata maggiore (posta alla fine)
+                        }
+
+                        // Confronta le ore solo se entrambe non sono vuote
+                        LocalTime time1 = LocalTime.parse(hour1);
+                        LocalTime time2 = LocalTime.parse(hour2);
+
+                        // Aggiungi logica per gestire le ore tra mezzanotte e le 3
+                        if (isBetweenMidnightAnd3(time1) && isBetweenMidnightAnd3(time2)) {
+                            // Se entrambe le ore sono tra mezzanotte e le 3, confronta normalmente
+                            result = time2.compareTo(time1); // Ordine decrescente per ora (più recenti prima)
+                        } else if (isBetweenMidnightAnd3(time1)) {
+                            // Se solo l'ora di match1 è tra mezzanotte e le 3, posizionalo prima
+                            result = -1;
+                        } else if (isBetweenMidnightAnd3(time2)) {
+                            // Se solo l'ora di match2 è tra mezzanotte e le 3, posizionalo prima
+                            result = 1;
+                        } else {
+                            // Altrimenti, confronta normalmente
+                            result = time2.compareTo(time1); // Ordine decrescente per ora (più recenti prima)
+                        }
                     }
 
-                    // Confronta le ore solo se entrambe non sono vuote
-                    LocalTime time1 = LocalTime.parse(hour1);
-                    LocalTime time2 = LocalTime.parse(hour2);
-
-                    // Aggiungi logica per gestire le ore tra mezzanotte e le 3
-                    if (isBetweenMidnightAnd3(time1) && isBetweenMidnightAnd3(time2)) {
-                        // Se entrambe le ore sono tra mezzanotte e le 3, confronta normalmente
-                        result = time2.compareTo(time1); // Ordine decrescente per ora (più recenti prima)
-                    } else if (isBetweenMidnightAnd3(time1)) {
-                        // Se solo l'ora di match1 è tra mezzanotte e le 3, posizionalo prima
-                        result = -1;
-                    } else if (isBetweenMidnightAnd3(time2)) {
-                        // Se solo l'ora di match2 è tra mezzanotte e le 3, posizionalo prima
-                        result = 1;
-                    } else {
-                        // Altrimenti, confronta normalmente
-                        result = time2.compareTo(time1); // Ordine decrescente per ora (più recenti prima)
-                    }
+                    return result;
                 }
 
-                return result;
-            }
+                // Metodo ausiliario per verificare se un'ora è compresa tra mezzanotte e le 3
+                private boolean isBetweenMidnightAnd3(LocalTime time) {
+                    return !time.isBefore(LocalTime.MIDNIGHT) && time.isBefore(LocalTime.of(3, 0));
+                }
+            });
+        }else {
 
-            // Metodo ausiliario per verificare se un'ora è compresa tra mezzanotte e le 3
-            private boolean isBetweenMidnightAnd3(LocalTime time) {
-                return !time.isBefore(LocalTime.MIDNIGHT) && time.isBefore(LocalTime.of(3, 0));
-            }
-        });
+
+            Collections.sort(matches, new Comparator<Match>() {
+                @Override
+                public int compare(Match match1, Match match2) {
+
+                    int match1Diff=match1.scoreWinner-match1.scoreLoser;
+                    int match2Diff=match2.scoreWinner-match2.scoreLoser;
+
+                    if(match1Diff>match2Diff)
+                        return -1;
+                    else   if(match2Diff>match1Diff)
+                        return 1;
+                    else return 0;
+
+
+                }
+            });
+        }
 
         if(player1==null||player2==null)
         {
