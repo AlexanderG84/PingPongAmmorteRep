@@ -557,23 +557,23 @@ public class MatchActivity extends AppCompatActivity {
             });
         }else {
 
-
             Collections.sort(matches, new Comparator<Match>() {
                 @Override
                 public int compare(Match match1, Match match2) {
 
-                    int match1Diff=match1.scoreWinner-match1.scoreLoser;
-                    int match2Diff=match2.scoreWinner-match2.scoreLoser;
+                    double ratio1 = (double) (match1.scoreWinner - match1.scoreLoser) / match1.scoreWinner;
+                    double ratio2 = (double) (match2.scoreWinner - match2.scoreLoser) / match2.scoreWinner;
 
-                    if(match1Diff>match2Diff)
+                    if (ratio1 > ratio2) {
                         return -1;
-                    else   if(match2Diff>match1Diff)
+                    } else if (ratio2 > ratio1) {
                         return 1;
-                    else return 0;
-
-
+                    } else {
+                        return 0;
+                    }
                 }
             });
+
         }
 
         if(player1==null||player2==null)
