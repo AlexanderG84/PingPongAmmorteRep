@@ -139,9 +139,22 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 players=_players;
                 postLoadPlayers();
                 mettiSfondo();
+
+                Intent intent = new Intent("com.example.ACTION_DATABASE_UPDATED");
+                sendBroadcast(intent);
+
             }
         });
     }
+
+
+    private MatchActivity matchActivityInstance;
+
+    // Metodo per impostare l'istanza corrente di MatchActivity
+    public void setMatchActivityInstance(MatchActivity matchActivityInstance) {
+        this.matchActivityInstance = matchActivityInstance;
+    }
+
 
     private void checkAndRequestStoragePermission(Runnable onSuccess) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
@@ -1009,6 +1022,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 Intent intent = new Intent(MainActivity.this, MatchActivity.class);
                 intent.putExtra("players", players);
                 startActivity(intent);
+
+
 
             }
         });

@@ -4,8 +4,10 @@ import static AuletteBlu.pingpongammorte.MainActivity.driveInteraction;
 import static AuletteBlu.pingpongammorte.MatchUtils.distinctMatch;
 import static AuletteBlu.pingpongammorte.MatchUtils.removeMatchesWithId;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -49,7 +51,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class MatchActivity extends AppCompatActivity {
+import AuletteBlu.pingpongammorte.utils.DriveInteraction;
+
+public class MatchActivity extends AppCompatActivity  {
 
     private Spinner player1Spinner, player2Spinner, dateSpinner;
     private RadioGroup sportRadioGroup;
@@ -190,7 +194,7 @@ return ack;
 
 
     private void handleLastModifiedResult(Long lastModified, int position) {
-        if (lastModified != null) {
+        if (lastModified != null&&lastModified<=driveInteraction.LastModificatedPlayers) {
 
             Match matchToDelete = matchAdapter.getItem(position);
 
@@ -272,10 +276,26 @@ return ack;
 
     }
 
+
+    private BroadcastReceiver databaseUpdateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            // Controlla se l'intento ricevuto è quello per l'aggiornamento del database
+            if ("com.example.ACTION_DATABASE_UPDATED".equals(intent.getAction())) {
+                // Chiamare il metodo update()
+                players=MainActivity.players;
+                updateMatches();
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.match_activity);
+
+        IntentFilter filter = new IntentFilter("com.example.ACTION_DATABASE_UPDATED");
+        registerReceiver(databaseUpdateReceiver, filter);
 
         // Recupera la lista di giocatori dall'Intent
         //players = (ArrayList<Player>) getIntent().getSerializableExtra("players");
@@ -288,6 +308,11 @@ return ack;
         matchListView = findViewById(R.id.match_list_view);
 
         checkBoxPipponi = findViewById(R.id.checkBoxPipponi);
+/*
+
+        driveInteraction.setUpdateListener(this);
+        driveInteraction.startListeningToLastModified();
+*/
 
         checkBoxPipponi.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
@@ -710,7 +735,12 @@ return ack;
         matchAdapter.notifyDataSetChanged();
     }
 
-    private void updateMatches() {
+  /*  @Override
+    public void onFirebaseDataChanged() {
+        updateMatches();
+    }*/
+
+    public void updateMatches() {
         // Ottieni i giocatori selezionati, lo sport selezionato e la data selezionata
         Player player1 = (Player) player1Spinner.getSelectedItem();
         Player player2 = (Player) player2Spinner.getSelectedItem();
