@@ -1061,7 +1061,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
     private void handleLastModifiedResult(Long lastModified) {
         if (lastModified != null) {
-            if (blockSaving||lastModified>driveInteraction.LastModificatedPlayers) {
+            if (blockSaving||lastModified!=driveInteraction.LastModificatedPlayers) {
                 // Mostra un messaggio di errore e gestisci il blocco
                 Toast.makeText(MainActivity.this, "CARICAMENTO FALLITO: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_SHORT).show();
                 coloraSfondo(false,"","");

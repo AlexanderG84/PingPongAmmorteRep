@@ -194,7 +194,7 @@ return ack;
 
 
     private void handleLastModifiedResult(Long lastModified, int position) {
-        if (lastModified != null&&lastModified<=driveInteraction.LastModificatedPlayers) {
+        if (lastModified != null&&lastModified==driveInteraction.LastModificatedPlayers) {
 
             Match matchToDelete = matchAdapter.getItem(position);
 
