@@ -58,6 +58,10 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -88,6 +92,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import AuletteBlu.pingpongammorte.utils.DriveInteraction;
 import AuletteBlu.pingpongammorte.utils.UpdateManager;
@@ -112,6 +118,10 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
     private Button viewScoresButton;
     private Button viewHistoryButton;
     private Button viewHistoryAlbo;
+
+    EditText player1ScoreEditText ;
+    EditText player2ScoreEditText ;
+
     Button btnClearPlayers;
     Button btnMockPlayer;
 
@@ -818,8 +828,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         }
 
         refreshSpinner();
-        EditText player1ScoreEditText = findViewById(R.id.player1_score);
-        EditText player2ScoreEditText = findViewById(R.id.player2_score);
+
 
         // Imposta il valore di default a -1
         player1ScoreEditText.setText("-1");
@@ -857,6 +866,10 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         submitButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                checkLastModified();
+                if(true)
+                    return;
 
                 if(blockSaving/*||(driveInteraction.LastModificatedPlayers!=null&&driveInteraction.getLastModifiedSynchronously()>driveInteraction.LastModificatedPlayers)*/){
                     //saveScoresToPreferences();
@@ -1013,6 +1026,155 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
     }
 
+    private void checkLastModified() {
+        DatabaseReference lastModifiedDbRef =driveInteraction.databaseRef.child("lastModified");
+        lastModifiedDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Long lastModified = dataSnapshot.getValue(Long.class);
+                handleLastModifiedResult(lastModified);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Gestire l'errore
+                handleLastModifiedResult(null);
+            }
+        });
+    }
+
+
+    private void handleLastModifiedResult(Long lastModified) {
+        if (lastModified != null) {
+            if (blockSaving||lastModified>driveInteraction.LastModificatedPlayers) {
+                // Mostra un messaggio di errore e gestisci il blocco
+                Toast.makeText(MainActivity.this, "CARICAMENTO FALLITO: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_SHORT).show();
+                coloraSfondo(false,"","");
+                Log.e("log","blocked");
+            } else {
+                // Esegui le operazioni previste dopo il controllo del lastModified
+                // ad esempio, esegui il salvataggio dei punteggi
+                submitMatch();
+            }
+        } else {
+            // Gestisci il caso in cui non sia stato possibile ottenere lastModified
+            // Puoi mostrare un messaggio di errore o gestire la situazione in modo appropriato
+        }
+    }
+
+    public void submitMatch() {
+
+
+        int player1Score=-1;
+        int player2Score=-1;
+
+        try {
+            // Converti i punteggi da String a Integer
+            player1Score = Integer.parseInt(player1ScoreEditText.getText().toString().trim());
+            player2Score = Integer.parseInt(player2ScoreEditText.getText().toString().trim());
+        } catch (NumberFormatException e) {
+            player1Score=-1;
+            player2Score=-1;
+
+        }
+
+// Inizialmente assumiamo che il giocatore 1 sia il vincitore
+        Player winner = (Player) player1Spinner.getSelectedItem();
+        Player loser = (Player) player2Spinner.getSelectedItem();
+        int winnerScore = player1Score;
+        int loserScore = player2Score;
+
+// Se il punteggio del giocatore 2 è maggiore, allora diventa il vincitore
+        if (player2Score > player1Score) {
+            winner = (Player) player2Spinner.getSelectedItem();
+            loser = (Player) player1Spinner.getSelectedItem();
+            winnerScore = player2Score;
+            loserScore = player1Score;
+        }
+
+// Aggiorna i giocatori con i loro nomi reali
+        winner = findPlayerByNameWithoutCloning(players, winner.getName());
+        loser = findPlayerByNameWithoutCloning(players, loser.getName());
+
+// Controlla che i giocatori selezionati non siano la stessa persona
+        if (winner.equals(loser)) {
+            //saveScoresToPreferences();
+            Toast.makeText(MainActivity.this, "I giocatori selezionati devono essere diversi!", Toast.LENGTH_SHORT).show();
+            coloraSfondo(false,"","");
+            return;
+        }
+
+
+        String[] winnerNames = winner.getName().split("-");
+        String[] loserNames = loser.getName().split("-");
+
+        // Verifica che non ci siano duplicati
+        if (containsDuplicate(winnerNames, loserNames)) {
+            Toast.makeText(MainActivity.this, "FAGGIANO! Un giocatore non può stare in entrambe le squadre.", Toast.LENGTH_SHORT).show();
+            coloraSfondo(false,"","");;
+            return;
+
+        }
+
+// Aggiorna il punteggio del vincitore e registra la vittoria
+        winner.setScore(winner.getScore() + 1);
+        winner.addVictoryAgainst(loser.getName());
+
+        // String currentDate = null;
+        int delay = 0; // Numero di giorni da sottrarre
+        String resultDate = null;
+        String currentHour=LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            LocalDate currentDate = LocalDate.now();
+            LocalTime currentTime = LocalTime.now();
+
+            // Controlla se l'ora corrente è tra mezzanotte e le 2 AM
+            if (currentTime.isAfter(LocalTime.MIDNIGHT) && currentTime.isBefore(LocalTime.of(2, 0))) {
+                // Se sì, considera la partita come parte del giorno precedente
+                currentDate = currentDate.minusDays(1);
+            }
+
+            // Qui puoi aggiungere il tuo "delay" se necessario
+            LocalDate adjustedDate = currentDate.minusDays(delay);
+            resultDate = adjustedDate.toString();
+            // Fai qualcosa con resultDate, ad esempio mostralo all'utente
+        }
+//                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+//                    // Imposta la data al 29 ottobre 2023
+//                    LocalDate specificDate = LocalDate.of(2023, Month.OCTOBER, 29);
+//                    resultDate = specificDate.toString();
+//                    // Fai qualcosa con resultDate, ad esempio mostralo all'utente
+//                }
+
+
+        // Crea e salva il match
+        Match match = new Match(winner.getName(), loser.getName(), resultDate, matchType, winnerScore, loserScore,currentHour,RandomStringGenerator.generateRandomString());
+
+        winner.addMatch(match);
+        loser.addMatch(match);
+        boolean ack= saveScoresToPreferences("write");
+
+        if(!ack){
+            Toast.makeText(MainActivity.this, "CARICAMENTO FALLITO: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_SHORT).show();
+            coloraSfondo(false,"","");
+            return;
+
+        }
+// Messaggio di vittoria
+        if(winnerScore-loserScore>7)
+            Toast.makeText(MainActivity.this, winner.getName() + " ROMPE IL CULO a quella pippa di "+loser.getName(), Toast.LENGTH_SHORT).show();
+
+        else
+            Toast.makeText(MainActivity.this, winner.getName() + " VINCE  contro quella pippa di "+loser.getName(), Toast.LENGTH_SHORT).show();
+        coloraSfondo(true, winner.getName(), loser.getName());
+// Reset dei campi del punteggio
+        player1ScoreEditText.setText("-1");
+        player2ScoreEditText.setText("-1");
+
+// Nascondi la tastiera
+        hideKeyboard();
+        refreshSpinner();
+    }
 
     @Override
     protected void onRestart() {
@@ -1057,6 +1219,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         context=getApplicationContext();
 
 
+         player1ScoreEditText = findViewById(R.id.player1_score);
+         player2ScoreEditText = findViewById(R.id.player2_score);
 
         // Ottieni il riferimento al TextView
         TextView versionTextView = findViewById(R.id.app_version);
@@ -1120,7 +1284,19 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
         driveInteraction.initializeFirebase();
         driveInteraction.setUpdateListener(this);
-        driveInteraction.startListeningForUpdates();
+        driveInteraction.startListeningToLastModified();
+
+        ExecutorService executorService;
+        executorService = Executors.newSingleThreadExecutor();
+        executorService.execute(new Runnable() {
+            @Override
+            public void run() {
+                driveInteraction.getIdNameMapFromFirebaseSync();
+            }
+        });
+
+       // driveInteraction.getIdNameMapFromFirebaseSync();
+      //  driveInteraction.startListeningForUpdates();
 
         Log.d("DriveInte FirebaseInit", "Firebase inizializzato con successo");
         // Supponiamo che tu abbia una lista di giocatori predefinita

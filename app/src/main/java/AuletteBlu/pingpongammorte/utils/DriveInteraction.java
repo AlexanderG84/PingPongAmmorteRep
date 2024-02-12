@@ -8,6 +8,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -31,7 +32,7 @@ public class DriveInteraction {
 
     private boolean firstInteraction = true;
 
-    private DatabaseReference databaseRef;
+    public DatabaseReference databaseRef;
 
     public Long LastModificatedPlayers;
 
@@ -128,12 +129,16 @@ public class DriveInteraction {
     }
 
 
+
+
+
+
     public  String getJsonSynchronously()  {
 
         Long tmpLast=getLastModifiedSynchronously();
-        if(LastModificatedPlayers==tmpLast&&players.size()>0)
+       /* if(LastModificatedPlayers==tmpLast&&players.size()>0)
             return "";
-
+*/
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<String> jsonRef = new AtomicReference<>();
 
@@ -167,12 +172,13 @@ public class DriveInteraction {
     public  Long getLastModifiedSynchronously()  {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Long> lastModifiedRef = new AtomicReference<>();
-
+        final Long[] gg = new Long[1];
         DatabaseReference lastModifiedDbRef = databaseRef.child("lastModified");
         lastModifiedDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                lastModifiedRef.set(dataSnapshot.getValue(Long.class));
+                gg[0] =dataSnapshot.getValue(Long.class);
+               // lastModifiedRef.set(dataSnapshot.getValue(Long.class));
                 latch.countDown();
             }
 
@@ -188,7 +194,8 @@ public class DriveInteraction {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        Long lastM=lastModifiedRef.get();
+       // Long lastM=lastModifiedRef.get();
+        Long lastM=gg[0];
         Log.e("Driveinteraction LastMod", lastM+"");
         return lastM;
     }
@@ -204,13 +211,34 @@ public class DriveInteraction {
         void onFirebaseDataChanged();
     }
 
+
+
+    public void startListeningToLastModified() {
+        DatabaseReference lastModifiedRef = databaseRef.child("lastModified");
+        lastModifiedRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (updateListener != null) {
+                    updateListener.onFirebaseDataChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle error
+            }
+        });
+    }
+
     public boolean recordAccess(String userId, String actionType) {
-        if (!firstInteraction /*|| userId.equals("1442eea5-2d3c-42f8-a693-fd98f33d8549")*/)
-            return false;
+       // if (!firstInteraction /*|| userId.equals("1442eea5-2d3c-42f8-a693-fd98f33d8549")*/)
+      //      return false;
         try {
             Log.e("DriveInteraction",actionType);
-            if(actionType.equals("write")&&LastModificatedPlayers!=null&&getLastModifiedSynchronously()>LastModificatedPlayers)
+           /* if(actionType.equals("write")&&LastModificatedPlayers!=null&&getLastModifiedSynchronously()>LastModificatedPlayers)
                 return false;
+*/
+
             firstInteraction = false;
 
             // DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(formattedDate); // Usa il timestamp formattato come chiave diretta
@@ -220,7 +248,16 @@ public class DriveInteraction {
             long negTimestamp = Long.MAX_VALUE - System.currentTimeMillis();
 
 
-            userId= getIdNameMapFromFirebaseSync(userId);
+            if (idNameMap.containsKey(userId)) {
+                String nome = idNameMap.get(userId);
+                // Restituisci la stringa composta da nome + "_" + id
+                userId =  nome ;
+            } else {
+                // Se l'id non è presente nella lista, restituisci solo l'id
+
+            }
+
+
             String key = negTimestamp + "___" + formattedDate;
             DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(key);
 
@@ -241,6 +278,7 @@ public class DriveInteraction {
 return false;
         }
     }
+
 
     public Map<String, String> _getIdNameMapFromFirebaseSync() {
         final CountDownLatch latch = new CountDownLatch(1);
@@ -288,7 +326,7 @@ return false;
     }
 
 
-    public String getIdNameMapFromFirebaseSync(String id) {
+    public void getIdNameMapFromFirebaseSync() {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Map<String, String>> idNameMapReference = new AtomicReference<>();
 
@@ -325,23 +363,18 @@ return false;
             e.printStackTrace();
         }
 
-        Map<String, String> idNameMap = idNameMapReference.get();
+         idNameMap = idNameMapReference.get();
         if (idNameMap == null) {
             idNameMap = new HashMap<>(); // Inizializza la mappa vuota in caso di errore
         }
 
-        if (idNameMap.containsKey(id)) {
-            String nome = idNameMap.get(id);
-            // Restituisci la stringa composta da nome + "_" + id
-            return nome ;
-        } else {
-            // Se l'id non è presente nella lista, restituisci solo l'id
-            return id;
-        }
+
 
 
     }
 
+
+    Map<String, String> idNameMap;
 
 /*
 
