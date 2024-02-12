@@ -8,6 +8,7 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -128,12 +129,16 @@ public class DriveInteraction {
     }
 
 
+
+
+
+
     public  String getJsonSynchronously()  {
 
         Long tmpLast=getLastModifiedSynchronously();
-        if(LastModificatedPlayers==tmpLast&&players.size()>0)
+       /* if(LastModificatedPlayers==tmpLast&&players.size()>0)
             return "";
-
+*/
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<String> jsonRef = new AtomicReference<>();
 
@@ -167,12 +172,13 @@ public class DriveInteraction {
     public  Long getLastModifiedSynchronously()  {
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<Long> lastModifiedRef = new AtomicReference<>();
-
+        final Long[] gg = new Long[1];
         DatabaseReference lastModifiedDbRef = databaseRef.child("lastModified");
         lastModifiedDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                lastModifiedRef.set(dataSnapshot.getValue(Long.class));
+                gg[0] =dataSnapshot.getValue(Long.class);
+               // lastModifiedRef.set(dataSnapshot.getValue(Long.class));
                 latch.countDown();
             }
 
@@ -188,7 +194,8 @@ public class DriveInteraction {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        Long lastM=lastModifiedRef.get();
+       // Long lastM=lastModifiedRef.get();
+        Long lastM=gg[0];
         Log.e("Driveinteraction LastMod", lastM+"");
         return lastM;
     }
@@ -204,13 +211,34 @@ public class DriveInteraction {
         void onFirebaseDataChanged();
     }
 
+
+
+    public void startListeningToLastModified() {
+        DatabaseReference lastModifiedRef = databaseRef.child("lastModified");
+        lastModifiedRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (updateListener != null) {
+                    updateListener.onFirebaseDataChanged();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle error
+            }
+        });
+    }
+
     public boolean recordAccess(String userId, String actionType) {
-        if (!firstInteraction /*|| userId.equals("1442eea5-2d3c-42f8-a693-fd98f33d8549")*/)
-            return false;
+       // if (!firstInteraction /*|| userId.equals("1442eea5-2d3c-42f8-a693-fd98f33d8549")*/)
+      //      return false;
         try {
             Log.e("DriveInteraction",actionType);
             if(actionType.equals("write")&&LastModificatedPlayers!=null&&getLastModifiedSynchronously()>LastModificatedPlayers)
                 return false;
+
+
             firstInteraction = false;
 
             // DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(formattedDate); // Usa il timestamp formattato come chiave diretta
@@ -241,6 +269,7 @@ public class DriveInteraction {
 return false;
         }
     }
+
 
     public Map<String, String> _getIdNameMapFromFirebaseSync() {
         final CountDownLatch latch = new CountDownLatch(1);

@@ -1120,7 +1120,8 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
         driveInteraction.initializeFirebase();
         driveInteraction.setUpdateListener(this);
-        driveInteraction.startListeningForUpdates();
+        driveInteraction.startListeningToLastModified();
+      //  driveInteraction.startListeningForUpdates();
 
         Log.d("DriveInte FirebaseInit", "Firebase inizializzato con successo");
         // Supponiamo che tu abbia una lista di giocatori predefinita
