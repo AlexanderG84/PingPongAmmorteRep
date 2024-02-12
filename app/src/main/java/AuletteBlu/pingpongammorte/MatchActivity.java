@@ -25,6 +25,7 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -57,13 +58,13 @@ public class MatchActivity extends AppCompatActivity {
     boolean pipponi=false;
 
 
-    private void saveScoresToPreferences() {
+    private boolean saveScoresToPreferences() {
         Gson gson = new Gson();
         String playersJson = gson.toJson(players);
-
+        boolean ack=false;
         try {
             //driveInteraction.readFirebaseData();
-            driveInteraction.uploadText(playersJson);
+            ack=driveInteraction.uploadText(playersJson,"write");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -83,7 +84,7 @@ public class MatchActivity extends AppCompatActivity {
                 }
             }
         }
-
+return ack;
     }
     @Override
     public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
@@ -148,7 +149,16 @@ public class MatchActivity extends AppCompatActivity {
 
         // Qui puoi chiamare il tuo metodo updateMatch() se necessario
         updateMatches(); // Questo metodo dovrebbe essere definito da te, in base a quello che deve fare
-        saveScoresToPreferences();
+        boolean ack=saveScoresToPreferences();
+
+
+
+        if(!ack){
+            Toast.makeText(MatchActivity.this, "CANCELLAZIONE FALLITA: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_LONG).show();
+            //coloraSfondo(false,"","");
+            return;
+
+        }
     }
 
 

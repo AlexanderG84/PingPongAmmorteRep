@@ -124,9 +124,9 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
     public void onFirebaseDataChanged() {
         loadScoresFromPreferences(new LoadScoresCallback() {
             @Override
-            public void onScoresLoaded(List<Player> players) {
+            public void onScoresLoaded(ArrayList<Player> _players) {
                 // Logica da eseguire dopo il caricamento di 'players'
-
+                players=_players;
                 postLoadPlayers();
                 mettiSfondo();
             }
@@ -258,6 +258,10 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                         Log.e("FIREBASE", jsonFromDB);
 
                         try {
+                            if(jsonFromDB.equals(""))
+                                return;
+
+
                             players = gson.fromJson(jsonFromDB, playerListType);
                             blockSaving=false;
                         } catch (JsonSyntaxException e) {
@@ -375,7 +379,14 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 players = gson.fromJson(sb.toString(), playerListType);
                 is.close();
                 updateAdapter();
-                saveScoresToPreferences();
+                boolean ack= saveScoresToPreferences("write");
+
+                if(!ack){
+                    Toast.makeText(MainActivity.this, "CARICAMENTO FALLITO: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_SHORT).show();
+                    coloraSfondo(false,"","");
+                    return;
+
+                }
                 foundImgSfondo();
                 mettiSfondo();
             }
@@ -436,13 +447,13 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         }
     }
 
-    private void saveScoresToPreferences() {
+    private boolean saveScoresToPreferences(String actionType) {
         Gson gson = new Gson();
         String playersJson = gson.toJson(players);
-
+        boolean ack=false;
         try {
             //driveInteraction.readFirebaseData();
-            driveInteraction.uploadText(playersJson);
+            ack=driveInteraction.uploadText(playersJson,actionType);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -463,6 +474,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             }
         }
 
+        return ack;
     }
 
     public void hideKeyboard() {
@@ -678,7 +690,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
 
     public interface LoadScoresCallback {
-        void onScoresLoaded(List<Player> players);
+        void onScoresLoaded(ArrayList<Player> players);
     }
 
     public void postLoadPlayers(){
@@ -727,7 +739,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             @Override
             public void onClick(View view) {
                 onAddPlayerClicked();
-                saveScoresToPreferences();
+                saveScoresToPreferences("read");
                 hideKeyboard();
             }
         });
@@ -846,11 +858,12 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             @Override
             public void onClick(View v) {
 
-                if(blockSaving){
+                if(blockSaving/*||(driveInteraction.LastModificatedPlayers!=null&&driveInteraction.getLastModifiedSynchronously()>driveInteraction.LastModificatedPlayers)*/){
                     //saveScoresToPreferences();
                     Toast.makeText(MainActivity.this, "CARICAMENTO FALLITO: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_SHORT).show();
-                    //coloraSfondo(false);
+                     coloraSfondo(false,"","");
                     Log.e("log","blocked");
+
                     return;
                 }
 
@@ -941,8 +954,14 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
                 winner.addMatch(match);
                 loser.addMatch(match);
-                saveScoresToPreferences();
+               boolean ack= saveScoresToPreferences("write");
 
+               if(!ack){
+                   Toast.makeText(MainActivity.this, "CARICAMENTO FALLITO: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_SHORT).show();
+                   coloraSfondo(false,"","");
+                   return;
+
+               }
 // Messaggio di vittoria
                 if(winnerScore-loserScore>7)
                     Toast.makeText(MainActivity.this, winner.getName() + " ROMPE IL CULO a quella pippa di "+loser.getName(), Toast.LENGTH_SHORT).show();
@@ -1016,9 +1035,9 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
         // updatePlayers();
         loadScoresFromPreferences(new LoadScoresCallback() {
             @Override
-            public void onScoresLoaded(List<Player> players) {
+            public void onScoresLoaded(ArrayList<Player> _players) {
                 // Logica da eseguire dopo il caricamento di 'players'
-
+                players=_players;
                 postLoadPlayers();
                 mettiSfondo();
             }
@@ -1123,9 +1142,9 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
 
         loadScoresFromPreferences(new LoadScoresCallback() {
             @Override
-            public void onScoresLoaded(List<Player> players) {
+            public void onScoresLoaded(ArrayList<Player> _players) {
                 // Logica da eseguire dopo il caricamento di 'players'
-
+                players=_players;
                 postLoadPlayers();
                 foundImgSfondo();
                 mettiSfondo();

@@ -1,6 +1,7 @@
 package AuletteBlu.pingpongammorte.utils;
 
 import static AuletteBlu.pingpongammorte.MainActivity.packageInfo;
+import static AuletteBlu.pingpongammorte.MainActivity.players;
 
 import android.net.Uri;
 import android.util.Log;
@@ -32,7 +33,7 @@ public class DriveInteraction {
 
     private DatabaseReference databaseRef;
 
-
+    public Long LastModificatedPlayers;
 
     public void initializeFirebase() {
         try {
@@ -104,15 +105,16 @@ public class DriveInteraction {
         });
     }*/
 
-    public  void uploadText(String text) {
+    public  boolean uploadText(String text,String actionType) {
         Map<String, Object> updates = new HashMap<>();
         updates.put("data", text);
+        if(actionType.equals("write"))
         updates.put("lastModified", ServerValue.TIMESTAMP);
 
         databaseRef.updateChildren(updates)
                 .addOnSuccessListener(aVoid -> Log.e("Firebase Write", "Dati caricati con successo"))
                 .addOnFailureListener(e -> Log.e("Firebase Write", "Errore durante il caricamento dei dati", e));
-        recordAccess(MainActivity.uniqueID, "read");
+       return recordAccess(MainActivity.uniqueID, actionType);
     }
 
     public  void getLastModified(ValueEventListener callback) {
@@ -127,6 +129,11 @@ public class DriveInteraction {
 
 
     public  String getJsonSynchronously()  {
+
+        Long tmpLast=getLastModifiedSynchronously();
+        if(LastModificatedPlayers==tmpLast&&players.size()>0)
+            return "";
+
         CountDownLatch latch = new CountDownLatch(1);
         AtomicReference<String> jsonRef = new AtomicReference<>();
 
@@ -150,6 +157,8 @@ public class DriveInteraction {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+
+        LastModificatedPlayers=tmpLast;
         recordAccess(MainActivity.uniqueID, "read");
 
         return jsonRef.get();
@@ -179,7 +188,9 @@ public class DriveInteraction {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        return lastModifiedRef.get();
+        Long lastM=lastModifiedRef.get();
+        Log.e("Driveinteraction LastMod", lastM+"");
+        return lastM;
     }
 
 
@@ -193,10 +204,13 @@ public class DriveInteraction {
         void onFirebaseDataChanged();
     }
 
-    public void recordAccess(String userId, String actionType) {
+    public boolean recordAccess(String userId, String actionType) {
         if (!firstInteraction /*|| userId.equals("1442eea5-2d3c-42f8-a693-fd98f33d8549")*/)
-            return;
+            return false;
         try {
+            Log.e("DriveInteraction",actionType);
+            if(actionType.equals("write")&&LastModificatedPlayers!=null&&getLastModifiedSynchronously()>LastModificatedPlayers)
+                return false;
             firstInteraction = false;
 
             // DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(formattedDate); // Usa il timestamp formattato come chiave diretta
@@ -222,8 +236,9 @@ public class DriveInteraction {
             // Imposta la variabile su false dopo il primo accesso
 
             firstInteraction=false;
+            return true;
         } catch (Exception e) {
-
+return false;
         }
     }
 
