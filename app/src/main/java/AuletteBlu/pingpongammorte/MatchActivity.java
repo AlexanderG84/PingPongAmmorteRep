@@ -31,6 +31,10 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.gson.Gson;
 
 import java.io.FileOutputStream;
@@ -111,6 +115,11 @@ return ack;
 
     // Metodo per cancellare la partita
     private void deleteMatch(int position) {
+
+        checkLastModified(position);
+        if (true)
+            return;
+
         // Supponiamo che 'matchAdapter' sia un campo nell'Activity che detiene il tuo ArrayAdapter
         Match matchToDelete = matchAdapter.getItem(position);
 
@@ -158,6 +167,85 @@ return ack;
             //coloraSfondo(false,"","");
             return;
 
+        }
+    }
+
+
+    private void checkLastModified(int position) {
+        DatabaseReference lastModifiedDbRef =driveInteraction.databaseRef.child("lastModified");
+        lastModifiedDbRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Long lastModified = dataSnapshot.getValue(Long.class);
+                handleLastModifiedResult(lastModified,position);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Gestire l'errore
+                handleLastModifiedResult(null,position);
+            }
+        });
+    }
+
+
+    private void handleLastModifiedResult(Long lastModified, int position) {
+        if (lastModified != null) {
+
+            Match matchToDelete = matchAdapter.getItem(position);
+
+            // Rimuovere il match dalla lista dei matches di entrambi i player
+
+            Player winner = players.stream()
+                    .filter(player -> player.getName().equals(matchToDelete.getWinner()))
+                    .findFirst()
+                    .orElse(null); // o qualsiasi valore di default tu desideri
+
+            Player loser = players.stream()
+                    .filter(player -> player.getName().equals(matchToDelete.getLoser()))
+                    .findFirst()
+                    .orElse(null); // o qualsiasi valore di default tu desideri
+
+
+
+
+            if (winner != null) {
+                winner.getMatches().remove(matchToDelete);
+                winner.setMatches(removeMatchesWithId(winner.getMatches(),matchToDelete.id_timestamp));
+            }
+
+            if (loser != null) {
+                loser.getMatches().remove(matchToDelete);
+                loser.setMatches(removeMatchesWithId(loser.getMatches(),matchToDelete.id_timestamp));
+
+            }
+
+            // Rimuovere il match dall'adapter e aggiornare la ListView
+            matchAdapter.remove(matchToDelete);
+            matchAdapter.notifyDataSetChanged();
+
+
+            updatePlayersSpinner();
+
+            // Qui puoi chiamare il tuo metodo updateMatch() se necessario
+            updateMatches(); // Questo metodo dovrebbe essere definito da te, in base a quello che deve fare
+            boolean ack=saveScoresToPreferences();
+
+
+
+            if(!ack){
+                Toast.makeText(MatchActivity.this, "CANCELLAZIONE FALLITA: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_LONG).show();
+                //coloraSfondo(false,"","");
+                return;
+
+            }
+
+
+        } else {
+            Toast.makeText(MatchActivity.this, "CANCELLAZIONE FALLITA: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_LONG).show();
+
+            // Gestisci il caso in cui non sia stato possibile ottenere lastModified
+            // Puoi mostrare un messaggio di errore o gestire la situazione in modo appropriato
         }
     }
 

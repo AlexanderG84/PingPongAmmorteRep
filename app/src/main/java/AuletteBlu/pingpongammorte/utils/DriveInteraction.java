@@ -32,7 +32,7 @@ public class DriveInteraction {
 
     private boolean firstInteraction = true;
 
-    private DatabaseReference databaseRef;
+    public DatabaseReference databaseRef;
 
     public Long LastModificatedPlayers;
 
@@ -235,9 +235,9 @@ public class DriveInteraction {
       //      return false;
         try {
             Log.e("DriveInteraction",actionType);
-            if(actionType.equals("write")&&LastModificatedPlayers!=null&&getLastModifiedSynchronously()>LastModificatedPlayers)
+           /* if(actionType.equals("write")&&LastModificatedPlayers!=null&&getLastModifiedSynchronously()>LastModificatedPlayers)
                 return false;
-
+*/
 
             firstInteraction = false;
 
@@ -248,7 +248,16 @@ public class DriveInteraction {
             long negTimestamp = Long.MAX_VALUE - System.currentTimeMillis();
 
 
-            userId= getIdNameMapFromFirebaseSync(userId);
+            if (idNameMap.containsKey(userId)) {
+                String nome = idNameMap.get(userId);
+                // Restituisci la stringa composta da nome + "_" + id
+                userId =  nome ;
+            } else {
+                // Se l'id non è presente nella lista, restituisci solo l'id
+
+            }
+
+
             String key = negTimestamp + "___" + formattedDate;
             DatabaseReference userLogRef = databaseRef.child("accessLogs").child(userId).child(key);
 
@@ -317,7 +326,7 @@ return false;
     }
 
 
-    public String getIdNameMapFromFirebaseSync(String id) {
+    public void getIdNameMapFromFirebaseSync() {
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicReference<Map<String, String>> idNameMapReference = new AtomicReference<>();
 
@@ -354,23 +363,18 @@ return false;
             e.printStackTrace();
         }
 
-        Map<String, String> idNameMap = idNameMapReference.get();
+         idNameMap = idNameMapReference.get();
         if (idNameMap == null) {
             idNameMap = new HashMap<>(); // Inizializza la mappa vuota in caso di errore
         }
 
-        if (idNameMap.containsKey(id)) {
-            String nome = idNameMap.get(id);
-            // Restituisci la stringa composta da nome + "_" + id
-            return nome ;
-        } else {
-            // Se l'id non è presente nella lista, restituisci solo l'id
-            return id;
-        }
+
 
 
     }
 
+
+    Map<String, String> idNameMap;
 
 /*
 
