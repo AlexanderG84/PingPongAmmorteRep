@@ -277,6 +277,7 @@ return ack;
     }
 
 
+
     private BroadcastReceiver databaseUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
