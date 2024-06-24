@@ -94,6 +94,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import AuletteBlu.pingpongammorte.utils.DriveInteraction;
 import AuletteBlu.pingpongammorte.utils.UpdateManager;
@@ -1414,7 +1415,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                 clonedPlayers=createIndividualPlayersList(clonedPlayers);
             }
             if (lastValidDate != null) {
-                LocalDate finalLastValidDate = lastValidDate;
+                /*LocalDate finalLastValidDate = lastValidDate;
                 int maxWins = clonedPlayers.stream()
                         .filter(player -> !player.getName().contains("-"))
                         .filter(player -> player.playedOnDate(finalLastValidDate.toString()))
@@ -1427,7 +1428,34 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
                         .filter(player -> player.playedOnDate(finalLastValidDate.toString()))
                         .filter(player -> countWinsOnDate(player, finalLastValidDate) == maxWins)
                         .max(Comparator.comparingDouble(player -> countPercWinsOnDate(player, finalLastValidDate)))
+                        .orElse(null);*/
+
+
+                LocalDate finalLastValidDate = lastValidDate;
+                int maxWins = clonedPlayers.stream()
+                        .filter(player -> !player.getName().contains("-"))
+                        .filter(player -> player.playedOnDate(finalLastValidDate.toString()))
+                        .mapToInt(player -> countWinsOnDate(player, finalLastValidDate))
+                        .max()
+                        .orElse(0);
+
+                List<Player> playersWithMaxWins = clonedPlayers.stream()
+                        .filter(player -> !player.getName().contains("-"))
+                        .filter(player -> player.playedOnDate(finalLastValidDate.toString()))
+                        .filter(player -> countWinsOnDate(player, finalLastValidDate) == maxWins)
+                        .collect(Collectors.toList());
+
+                if (playersWithMaxWins.size() > 1) {
+                    // Ricalcola la percentuale solo in base agli scontri tra questi giocatori
+                    playersWithMaxWins.forEach(player ->
+                            player.recalculateWinPercentageAgainst(playersWithMaxWins, finalLastValidDate.toString())
+                    );
+                }
+
+                Player playerWithMostWins = playersWithMaxWins.stream()
+                        .max(Comparator.comparingDouble(Player::getVictoryPercentagePartial))
                         .orElse(null);
+
 
                 if (playerWithMostWins != null) {
                     System.out.println("Il giocatore con più vittorie (e percentuale più alta in caso di parità): " + playerWithMostWins.getName());

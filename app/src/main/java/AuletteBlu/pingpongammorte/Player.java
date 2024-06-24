@@ -41,6 +41,26 @@ public class Player implements Serializable {
     }
 
 
+    public double getVictoryPercentagePartial() {
+        return this.victoryPercentagePartial;
+    }
+
+    public void recalculateWinPercentageAgainst(List<Player> players, String date) {
+        List<String> opponentNames = players.stream()
+                .map(Player::getName)
+                .collect(Collectors.toList());
+
+        ArrayList<Match> relevantMatches = getMatchesOnDateWithOpponents(opponentNames, date, matchType);
+
+        long wins = relevantMatches.stream()
+                .filter(match -> match.getWinner().equals(this.name))
+                .count();
+
+        long played = relevantMatches.size();
+
+        this.victoryPercentagePartial = played > 0 ? (double) wins / played * 100 : 0;
+    }
+
     public List<String> getAllVictoryDates() {
         List<String> dates = new ArrayList<>();
         for (Match match : matches) {
@@ -152,6 +172,7 @@ public class Player implements Serializable {
     }
 
     public long victoryPercentage;
+    public double victoryPercentagePartial;
     public void addVictoryAgainst(String opponentName) {
         this.victoriesAgainst.add(opponentName);
     }
