@@ -1074,7 +1074,7 @@ public class MainActivity extends AppCompatActivity implements DriveInteraction.
             }
         } else {
 
-            Toast.makeText(MainActivity.this, "CARICAMENTO FALLITO MALE: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "CARICAMENTO FALLITO MALE!: DATI INCONSISTENTI. Chiudere e riaprire l'app", Toast.LENGTH_SHORT).show();
             coloraSfondo(false,"","");
             Log.e("log","blocked2");
             // Gestisci il caso in cui non sia stato possibile ottenere lastModified
